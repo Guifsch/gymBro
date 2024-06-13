@@ -1,0 +1,10 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+.pageMarginTopNavFix {
+    padding-top: 64px
+}
+#root > div:nth-child(3) {
+    background-color: #e2e8f0
+}
