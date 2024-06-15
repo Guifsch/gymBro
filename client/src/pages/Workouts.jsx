@@ -5,17 +5,28 @@ import {
   useMaterialReactTable,
 } from "material-react-table";
 
-import Box from "@mui/material/Box";
+import { ThemeProvider, createTheme } from "@mui/material/styles"
+import { Container, CssBaseline } from "@mui/material";
+
+// import Tabs from '@mui/material/Tabs';
+// import Tab from '@mui/material/Tab';
+// import TabContext from '@mui/lab/TabContext';
+// import TabList from '@mui/lab/TabList';
+// import TabPanel from '@mui/lab/TabPanel';
+
 import Modal from "@mui/material/Modal";
 import Fade from "@mui/material/Fade";
 import Button from "@mui/material/Button";
-import Container from "@mui/material/Container";
+
 import { TextField } from "@mui/material";
 import React, { useCallback, useState, useEffect } from "react";
+import Skeleton from "@mui/material/Skeleton";
+import LinearProgress from "@mui/material/LinearProgress";
 import CardMedia from "@mui/material/CardMedia";
 import axiosConfig from "../utils/axios";
 import Typography from "@mui/material/Typography";
 import IconButton from "@mui/material/IconButton";
+import CircularProgress from "@mui/material/CircularProgress";
 import { Edit, Delete } from "@mui/icons-material";
 import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
@@ -31,7 +42,10 @@ import {
   updateUserSuccess,
   signOut,
 } from "../redux/user/userSlice";
-import { snackBarMessageSuccess } from "../redux/snackbar/snackBarSlice";
+import {
+  snackBarMessageSuccess,
+  snackBarMessageError,
+} from "../redux/snackbar/snackBarSlice";
 import {
   getStorage,
   uploadBytesResumable,
@@ -40,7 +54,7 @@ import {
   deleteObject,
 } from "firebase/storage";
 import { app } from "../firebase";
-
+import { Box } from '@mui/material';
 const style = {
   position: "absolute",
   top: "50%",
@@ -51,36 +65,33 @@ const style = {
   bgcolor: "background.paper",
   border: "2px solid #000",
   boxShadow: 24,
-  p: 4,
 };
-
-const data = [
-  {
-    name: {
-      firstName: "John",
-      lastName: "Doe",
-    },
-    address: "261 Erdman Ford",
-    city: "East Daphne",
-    state: "Kentucky",
-  },
-];
 
 export default function Workouts() {
   const axiosInterceptor = axiosConfig();
   const dispatch = useDispatch();
+  const [valueTab, setValueTab] = React.useState('1');
   const [open, setOpen] = React.useState(false);
-  const [open2, setOpen2] = React.useState(false);
+  const [openUpdate, setOpenUpdate] = React.useState(false);
+  const [openShowImage, setOpenShowImage] = React.useState(false);
   const [images, setImages] = React.useState([]);
   const [image, setImage] = useState(undefined);
-  const [imagePreview, setImagePreviewImage] = useState(undefined);
+  const [imagePreview, setImagePreview] = useState(null);
+  const [loading, setLoading] = useState(false);
+  const [imageTableShow, setImageTableShow] = useState(undefined);
   const [imagePercent, setImagePercent] = useState(0);
   const [imageError, setImageError] = useState(false);
   const [content, setContent] = useState({});
-  const [content2, setContent2] = useState({});
+  const [modalContentUpdate, setModalContentUpdate] = useState({});
   const [workouts, setWorkouts] = useState([]);
   const [modalContent, setModalContent] = useState({});
   const { currentUser } = useSelector((state) => state.user);
+
+
+  const handleChangeTab = (event, newValue) => {
+    setValue(newValue);
+  };
+
 
   const getWorkout = useCallback(async () => {
     try {
@@ -89,7 +100,7 @@ export default function Workouts() {
       });
       setWorkouts(response.data.workouts);
       console.log(response.data.workouts, "workouts");
-      setImagePreviewImage(undefined);
+      setImagePreview(undefined);
     } catch (e) {
       setImageError(true);
       console.log(e, "erro");
@@ -115,7 +126,7 @@ export default function Workouts() {
       {
         accessorKey: "set", //normal accessorKey
         header: "Sets",
-        size: 200,
+        size: 150,
       },
       {
         accessorKey: "weight",
@@ -129,10 +140,16 @@ export default function Workouts() {
         size: 150,
         Cell: ({ row }) => (
           <Box
+            onClick={() => handleShowImage(row.original)}
             sx={{
               display: "flex",
               alignItems: "center",
               gap: "1rem",
+              transition: "0.2s",
+              "&:hover": {
+                filter: "contrast(0.5)",
+                transition: "0.2s",
+              },
             }}
           >
             <img
@@ -140,8 +157,32 @@ export default function Workouts() {
               height={30}
               src={row.original.exercisePicture}
               loading="lazy"
-              style={{ width: "100px", height: "100px", objectFit: "cover" }}
+              style={{
+                width: "100px",
+                height: "100px",
+                objectFit: "cover",
+                cursor: "pointer",
+              }}
             />
+            {/* {row.original.exercisePicture === null || undefined ? (
+              <img
+                alt="avatar"
+                height={30}
+                src={row.original.exercisePicture}
+                loading="lazy"
+                style={{
+                  width: "100px",
+                  height: "100px",
+                  objectFit: "cover",
+                  cursor: "pointer",
+                }}
+              />
+            ) : (
+              <Skeleton variant="rectangular" width={100} height={100}>
+                Imagem não encontrada
+              </Skeleton>
+            )} */}
+
             {/* using renderedCellValue instead of cell.getValue() preserves filter match highlighting */}
           </Box>
         ),
@@ -161,7 +202,7 @@ export default function Workouts() {
           >
             <IconButton
               sx={{ borderRadius: 0 }}
-              onClick={() => handleOpen2(row.original)}
+              onClick={() => handleOpenUpdate(row.original)}
             >
               <EditIcon />
             </IconButton>
@@ -179,10 +220,9 @@ export default function Workouts() {
     []
   );
 
-// const handleEdit =(e) => {
-// console.log(e, "samubomba")
-// }
-
+  // const handleEdit =(e) => {
+  // console.log(e, "samubomba")
+  // }
   const table = useMaterialReactTable({
     columns,
     data: workouts,
@@ -205,9 +245,12 @@ export default function Workouts() {
     console.log(content, "CONTENT");
   };
 
-  const handleChange2 = (e) => {
-    console.log(content2, "CONTENT");
-    setContent2({ ...content2, [e.target.id]: e.target.value });
+  const handleChangeUpdate = (e) => {
+    console.log(modalContentUpdate, "CONTENT");
+    setModalContentUpdate({
+      ...modalContentUpdate,
+      [e.target.id]: e.target.value,
+    });
   };
   const profileImage = async (e) => {
     const image = e.target.files[0];
@@ -219,7 +262,7 @@ export default function Workouts() {
       fileReader.onload = (e) => {
         const { result } = e.target;
         if (result) {
-          setImagePreviewImage(result);
+          setImagePreview(result);
         }
       };
       fileReader.readAsDataURL(image);
@@ -268,7 +311,7 @@ export default function Workouts() {
 
   const submitWorkout = async (e) => {
     e.preventDefault();
-    dispatch(loadingTrue());
+    setLoading(true);
     try {
       let updatedContent = { ...content };
 
@@ -285,22 +328,22 @@ export default function Workouts() {
       );
       dispatch(updateUserSuccess(response.data));
       dispatch(snackBarMessageSuccess("Treino salvo"));
-      setImagePreviewImage(undefined);
+      setImagePreview(undefined);
       getWorkout();
-      dispatch(loadingTrue());
     } catch (e) {
-      setImageError(true);
+      dispatch(snackBarMessageError("Arquivo inválido!"));
+
       console.log(e, "erro");
     }
-    dispatch(loadingFalse());
-    setImagePreviewImage(undefined);
+    setLoading(false);
+    setImagePreview(undefined);
   };
 
   const updateWorkout = async (e) => {
-  
-    dispatch(loadingTrue());
+    e.preventDefault();
+    setLoading(true);
     try {
-      let workoutUpdated = { ...content2 };
+      let workoutUpdated = { ...modalContentUpdate };
 
       if (imagePreview) {
         const imageUrl = await handleFileUpload(image);
@@ -315,12 +358,12 @@ export default function Workouts() {
       );
       console.log(response, "updateworkoutresponse");
       dispatch(snackBarMessageSuccess("Atualização completa"));
-      setImagePreviewImage(undefined);
+      setImagePreview(undefined);
     } catch (e) {
-      setImageError(true);
-      console.log(e, "erro");
+      dispatch(snackBarMessageError("Arquivo inválido!"));
     }
-    dispatch(loadingFalse());
+    getWorkout();
+    setLoading(false);
   };
 
   const handleDeleteExercisePicture = async (e) => {
@@ -328,54 +371,77 @@ export default function Workouts() {
     console.log(e, "gustavo");
 
     try {
-      removeImageFirebase(e.exercisePicture);
+      await removeImageFirebase(e.exercisePicture);
       const response = await axiosInterceptor.delete(
         `/api/workout/workouts/${e._id}`,
         { withCredentials: true }
       );
       console.log(response, "resposta");
+      dispatch(snackBarMessageSuccess("Exclusão bem succedida!"));
     } catch (e) {
       console.log(e, "erro");
     }
+    getWorkout();
     dispatch(loadingFalse());
-    getExercisePicture();
   };
 
   const removeImageFirebase = async (img) => {
     try {
       const storage = getStorage(app);
       const imageRef = ref(storage, img);
-      deleteObject(imageRef)
-        .then(() => {
-          // also remove the image from Firebase
-          console.log("la imagen se elimino");
-        })
-        .catch((error) => {
-          console.log("ocurrio un error: ", error);
-        });
+      deleteObject(imageRef);
     } catch (e) {
       console.log(e);
     }
   };
 
+  const handleShowImage = (e) => {
+    setImageTableShow(e.exercisePicture);
+    setOpenShowImage(true);
+  };
+  const handleCloseShowImage = () => {
+    setImagePreview(null);
+    setOpenShowImage(false);
+  };
+
   const handleOpen = (e) => {
-    setModalContent(e, console.log("teste"));
     setOpen(true);
   };
 
-  const handleClose = () => setOpen(false);
-
-  const handleOpen2 = (e) => {
-    setContent2(e);
-    console.log(e, "CASULO");
-    setOpen2(true);
+  const handleClose = () => {
+    setImagePreview(null);
+    setOpen(false);
   };
 
-  const handleClose2 = () => setOpen2(false);
+  const handleOpenUpdate = (e) => {
+    setModalContentUpdate(e);
+    setOpenUpdate(true);
+  };
+
+  const handleCloseUpdate = () => {
+    setImagePreview(null);
+    setOpenUpdate(false);
+  };
 
   return (
     <Box className="flex flex-col justify-initial items-center pageMarginTopNavFix">
       <Loading />
+      {/* <Tabs
+        value={valueTab}
+        onChange={handleChangeTab}
+        aria-label="wrapped label tabs example"
+      >
+        <Tab
+          value="one"
+          label="New Arrivals in the Longest Text of Nonfiction that should appear in the next line"
+          wrapped
+        />
+        <Tab value="two" label="Item Two" />
+        <Tab value="three" label="Item Three" />
+      </Tabs>
+ */}
+
+
       <Button
         variant="contained"
         sx={{
@@ -388,12 +454,10 @@ export default function Workouts() {
         </Typography>
       </Button>
 
-      <Container
-      sx={{pb: 10}}
-      >
+      <Container sx={{ pb: 10 }}>
         <MaterialReactTable table={table} />
       </Container>
-
+      {/* Modal Submit */}
       <Modal
         aria-labelledby="transition-modal-title"
         aria-describedby="transition-modal-description"
@@ -427,9 +491,38 @@ export default function Workouts() {
             <Box
               sx={{
                 position: "relative",
+                height: "100%",
+                width: "100%",
               }}
             >
-              <Loading />
+              {loading ? (
+                <Box
+                  sx={{
+                    transition:
+                      "opacity 225ms cubic-bezier(0.4, 0, 0.2, 1) 0ms",
+                    opacity: "1",
+                    position: "absolute",
+                    backgroundColor: "rgba(0, 0, 0, 0.5)",
+                    height: "100%",
+                    width: "100%",
+                    left: "0",
+                    top: "0",
+                    zIndex: "9999",
+                  }}
+                >
+                  <CircularProgress
+                    sx={{
+                      width: "80px!important",
+                      height: "80px!important",
+                      position: "absolute",
+                      left: "43%",
+                      top: "43%",
+                    }}
+                  />
+                </Box>
+              ) : (
+                false
+              )}
               <Box
                 className="boxDad"
                 component="form"
@@ -450,6 +543,7 @@ export default function Workouts() {
                     display: "flex",
                     flexWrap: "wrap",
                     justifyContent: "space-around",
+                    paddingTop: "50px",
                   }}
                 >
                   <TextField
@@ -524,7 +618,7 @@ export default function Workouts() {
                 >
                   <input
                     type="file"
-                    accept="image/*"
+                    accept="image/png, image/jpeg"
                     placeholder="Type some text"
                     onChange={(e) => profileImage(e)}
                   />
@@ -588,7 +682,7 @@ export default function Workouts() {
         {workouts.length > 0 ? (
           workouts.map((picture, index) => (
             <Box
-              onClick={() => handleOpen2(picture)}
+              onClick={() => handleOpenUpdate(picture)}
               key={index}
               sx={{
                 backgroundColor: "white",
@@ -636,13 +730,13 @@ export default function Workouts() {
           <Typography variant="h5">Nenhuma treino registrado</Typography>
         )}
       </Box> */}
-      
 
+      {/* Modal Edit */}
       <Modal
         aria-labelledby="transition-modal-title"
         aria-describedby="transition-modal-description"
-        open={open2}
-        onClose={handleClose2}
+        open={openUpdate}
+        onClose={handleCloseUpdate}
         closeAfterTransition
         slots={{ backdrop: Backdrop }}
         slotProps={{
@@ -652,10 +746,10 @@ export default function Workouts() {
           },
         }}
       >
-        <Fade in={open2}>
+        <Fade in={openUpdate}>
           <Box sx={style}>
             <IconButton
-              onClick={handleClose2}
+              onClick={handleCloseUpdate}
               size="large"
               sx={{
                 position: "absolute",
@@ -671,9 +765,38 @@ export default function Workouts() {
             <Box
               sx={{
                 position: "relative",
+                height: "100%",
+                width: "100%",
               }}
             >
-              <Loading />
+              {loading ? (
+                <Box
+                  sx={{
+                    transition:
+                      "opacity 225ms cubic-bezier(0.4, 0, 0.2, 1) 0ms",
+                    opacity: "1",
+                    position: "absolute",
+                    backgroundColor: "rgba(0, 0, 0, 0.5)",
+                    height: "100%",
+                    width: "100%",
+                    left: "0",
+                    top: "0",
+                    zIndex: "9999",
+                  }}
+                >
+                  <CircularProgress
+                    sx={{
+                      width: "80px!important",
+                      height: "80px!important",
+                      position: "absolute",
+                      left: "43%",
+                      top: "43%",
+                    }}
+                  />
+                </Box>
+              ) : (
+                false
+              )}
               <Box
                 className="boxDad"
                 component="form"
@@ -694,11 +817,12 @@ export default function Workouts() {
                     display: "flex",
                     flexWrap: "wrap",
                     justifyContent: "space-around",
+                    paddingTop: "50px",
                   }}
                 >
                   <TextField
-                    onChange={handleChange2}
-                    value={content2.name}
+                    onChange={handleChangeUpdate}
+                    value={modalContentUpdate.name}
                     type="name"
                     required
                     id="name"
@@ -711,8 +835,8 @@ export default function Workouts() {
                     }}
                   />
                   <TextField
-                    onChange={handleChange2}
-                    value={content2.rep}
+                    onChange={handleChangeUpdate}
+                    value={modalContentUpdate.rep}
                     type="rep"
                     required
                     id="rep"
@@ -725,8 +849,8 @@ export default function Workouts() {
                     }}
                   />
                   <TextField
-                    onChange={handleChange2}
-                    value={content2.set}
+                    onChange={handleChangeUpdate}
+                    value={modalContentUpdate.set}
                     type="set"
                     required
                     id="set"
@@ -739,8 +863,8 @@ export default function Workouts() {
                     }}
                   />
                   <TextField
-                    onChange={handleChange2}
-                    value={content2.weight}
+                    onChange={handleChangeUpdate}
+                    value={modalContentUpdate.weight}
                     type="weight"
                     required
                     id="weight"
@@ -779,7 +903,7 @@ export default function Workouts() {
                     }}
                   />
 
-                  {content2.exercisePicture ? (
+                  {imagePreview == null ? (
                     <CardMedia
                       component="img"
                       sx={{
@@ -788,29 +912,19 @@ export default function Workouts() {
                         height: "300px",
                         width: "450px",
                       }}
-                      image={content2.exercisePicture}
+                      image={modalContentUpdate.exercisePicture}
                     />
                   ) : (
-                    <Typography
+                    <CardMedia
+                      component="img"
                       sx={{
-                        display: "flex",
-                        flexDirection: "column",
-                        alignItems: "center",
-                        my: 5,
+                        objectFit: "cover",
+                        mt: 5,
+                        height: "300px",
+                        width: "450px",
                       }}
-                      variant="h5"
-                    >
-                      <CardMedia
-                        component="img"
-                        sx={{
-                          objectFit: "cover",
-                          mt: 5,
-                          height: "300px",
-                          width: "450px",
-                        }}
-                        image={imagePreview}
-                      />
-                    </Typography>
+                      image={imagePreview}
+                    />
                   )}
                 </Container>
                 <Container
@@ -821,6 +935,100 @@ export default function Workouts() {
                     mt: 3,
                   }}
                 ></Container>
+              </Box>
+            </Box>
+          </Box>
+        </Fade>
+      </Modal>
+
+      {/* Modal Preview */}
+      <Modal
+        aria-labelledby="transition-modal-title"
+        aria-describedby="transition-modal-description"
+        open={openShowImage}
+        onClose={handleCloseShowImage}
+        closeAfterTransition
+        slots={{ backdrop: Backdrop }}
+        slotProps={{
+          backdrop: {
+            timeout: 500,
+            position: "relative",
+          },
+        }}
+      >
+        <Fade in={openShowImage}>
+          <Box
+            sx={{
+              position: "absolute",
+              top: "50%",
+              left: "50%",
+              transform: "translate(-50%, -50%)",
+              width: "100%",
+              maxWidth: "800px",
+              maxHeight: "700px",
+              height: "100%",
+              bgcolor: "background.paper",
+              border: "2px solid #000",
+              boxShadow: 24,
+            }}
+          >
+            <IconButton
+              onClick={handleCloseShowImage}
+              size="large"
+              sx={{
+                position: "absolute",
+                top: "5px",
+                right: "10px",
+                zIndex: "999",
+              }}
+              aria-label="back"
+              color="primary"
+            >
+              <CloseIcon fontSize="inherit" />
+            </IconButton>
+            <Box
+              sx={{
+                display: "flex",
+                flexDirection: "column",
+                alignItems: "center",
+                height: "100%",
+                width: "100%",
+                justifyContent: "center",
+                position: "relative",
+              }}
+            >
+              <Box
+                className="boxDad"
+                sx={{
+                  "&:hover > svg": {
+                    visibility: "visible",
+                    transition: "0.5s",
+                    opacity: 1,
+                  },
+                  display: "flex",
+                  flexDirection: "column",
+                  alignItems: "center",
+                }}
+              >
+                <Box
+                  sx={{
+                    display: "flex",
+                    flexDirection: "column",
+                    alignItems: "center",
+                  }}
+                >
+                  <CardMedia
+                    component="img"
+                    sx={{
+                      objectFit: "contain",
+                      maxHeight: "400px",
+                      maxWidth: "450px",
+                      height: "100%",
+                      width: "100%",
+                    }}
+                    image={imageTableShow}
+                  />
+                </Box>
               </Box>
             </Box>
           </Box>

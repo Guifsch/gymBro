@@ -1,4 +1,4 @@
-import { React, useRef, useState, useEffect } from "react";
+import { React, useRef, useState, useEffect, useCallback } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import axiosConfig from "../utils/axios";
 import {
@@ -34,26 +34,49 @@ function Profile() {
   const axiosInterceptor = axiosConfig();
   const dispatch = useDispatch();
   // --FIREBASE STORAGE--
-  const [image, setImage] = useState(undefined);
-  const [imagePreview, setImagePreviewImage] = useState(undefined);
+  const [image, setImage] = useState(null);
+  const [imagePreview, setImagePreviewImage] = useState(null);
   const [loading, setLoading] = useState(false);
   const [imagePercent, setImagePercent] = useState(0);
   const [downloadedURL, setDownloadedURL] = useState({});
   const [imageError, setImageError] = useState(false);
   const fileRef = useRef(null);
-  const [formData, setFormData] = useState({});
+  const [formData, setFormData] = useState({
+    username: "",
+    email: "",
+    password: "",
+    profilePicture: ""
+  });
   const [defaultFormData, setDefaultFormData] = useState({});
   const { currentUser } = useSelector((state) => state.user);
   const [hover, setHover] = useState(false);
 
-  // useEffect(() => {
-  //   if (image) {
-  //     // const teste = URL.createObjectURL(image)
-  //     // setImage()
-  //     // console.log(teste)
-  //     handleFileUpload(image);
-  //   }
-  // }, [image]);
+
+
+
+
+
+
+
+  
+  const getUserProfile = useCallback(async () => {
+    try {
+      const response = await axiosInterceptor.get(
+        `/api/user/find/${currentUser._id}`,
+        { withCredentials: true }
+      ); 
+      setFormData(response.data)
+      console.log(response.data, "PROFILE");
+    } catch (e) {
+      console.log(e, "erro");
+    }
+  }, []);
+
+
+  
+  useEffect(() => {
+    getUserProfile();
+  }, [getUserProfile]);
 
   const profileImage = async (e) => {
     const image = e.target.files[0];
@@ -111,6 +134,7 @@ function Profile() {
     }
   };
 
+
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.id]: e.target.value });
   };
@@ -134,11 +158,12 @@ function Profile() {
       );
       dispatch(updateUserSuccess(response.data));
       dispatch(snackBarMessageSuccess("Atualização completa"));
-      setImagePreviewImage(undefined);
+      setImagePreviewImage(null);
     } catch (e) {
       setImageError(true);
       console.log(e, "erro");
     }
+    getUserProfile()
     dispatch(loadingFalse());
   };
 
@@ -157,7 +182,7 @@ function Profile() {
   };
 
   return (
-    <Box className="flex justify-center items-center h-screen bg-slate-200">
+    <Box className="flex justify-center items-center h-screen">
       <Loading />
       <Box
         height={600}
@@ -202,10 +227,11 @@ function Profile() {
               ref={fileRef}
               hidden
               accept="image/*"
-              // onChange={(e) => setImage(e.target.files[0])}
               onChange={(e) => profileImage(e)}
             />
             <CardMedia
+            component="img"
+
               sx={{
                 objectFit: "cover",
                 cursor: "pointer",
@@ -218,11 +244,9 @@ function Profile() {
                   transition: "0.5s",
                 },
               }}
+          
               image={
-                imagePreview ||
-                formData.profilePicture ||
-                currentUser.profilePicture ||
-                LogoAvatarStandard
+                 imagePreview ||  formData.profilePicture  
               }
             ></CardMedia>
             <CreateIcon
@@ -270,8 +294,8 @@ function Profile() {
           >
             <AccountCircle sx={{ color: "action.active", mr: 1, my: 0.5 }} />
             <TextField
-              onChange={handleChange}
-              defaultValue={currentUser.username}
+                    onChange={handleChange}
+              value={formData.username}
               type="username"
               required
               id="username"
@@ -299,7 +323,8 @@ function Profile() {
             <AccountCircle sx={{ color: "action.active", mr: 1, my: 0.5 }} />
             <TextField
               onChange={handleChange}
-              defaultValue={currentUser.email}
+              
+              value={formData.email}
               type="email"
               required
               id="email"
@@ -320,7 +345,7 @@ function Profile() {
           <Box sx={{ display: "flex", alignItems: "flex-end" }}>
             <LockIcon sx={{ color: "action.active", mr: 1, my: 0.5 }} />
             <TextField
-              onChange={handleChange}
+                   onChange={handleChange}
               type="password"
               id="password"
               label="Senha"
