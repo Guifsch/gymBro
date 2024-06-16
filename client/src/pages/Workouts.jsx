@@ -5,14 +5,11 @@ import {
   useMaterialReactTable,
 } from "material-react-table";
 
-import { ThemeProvider, createTheme } from "@mui/material/styles"
+import { ThemeProvider, createTheme } from "@mui/material/styles";
 import { Container, CssBaseline } from "@mui/material";
 
-// import Tabs from '@mui/material/Tabs';
-// import Tab from '@mui/material/Tab';
-// import TabContext from '@mui/lab/TabContext';
-// import TabList from '@mui/lab/TabList';
-// import TabPanel from '@mui/lab/TabPanel';
+import Tab from "@mui/material/Tab";
+import { TabContext, TabPanel, TabList } from "@mui/lab";
 
 import Modal from "@mui/material/Modal";
 import Fade from "@mui/material/Fade";
@@ -54,7 +51,7 @@ import {
   deleteObject,
 } from "firebase/storage";
 import { app } from "../firebase";
-import { Box } from '@mui/material';
+import { Box } from "@mui/material";
 const style = {
   position: "absolute",
   top: "50%",
@@ -70,7 +67,7 @@ const style = {
 export default function Workouts() {
   const axiosInterceptor = axiosConfig();
   const dispatch = useDispatch();
-  const [valueTab, setValueTab] = React.useState('1');
+  const [valueTab, setValueTab] = React.useState("1");
   const [open, setOpen] = React.useState(false);
   const [openUpdate, setOpenUpdate] = React.useState(false);
   const [openShowImage, setOpenShowImage] = React.useState(false);
@@ -87,11 +84,9 @@ export default function Workouts() {
   const [modalContent, setModalContent] = useState({});
   const { currentUser } = useSelector((state) => state.user);
 
-
   const handleChangeTab = (event, newValue) => {
-    setValue(newValue);
+    setValueTab(newValue);
   };
-
 
   const getWorkout = useCallback(async () => {
     try {
@@ -426,37 +421,32 @@ export default function Workouts() {
   return (
     <Box className="flex flex-col justify-initial items-center pageMarginTopNavFix">
       <Loading />
-      {/* <Tabs
-        value={valueTab}
-        onChange={handleChangeTab}
-        aria-label="wrapped label tabs example"
-      >
-        <Tab
-          value="one"
-          label="New Arrivals in the Longest Text of Nonfiction that should appear in the next line"
-          wrapped
-        />
-        <Tab value="two" label="Item Two" />
-        <Tab value="three" label="Item Three" />
-      </Tabs>
- */}
+      <TabContext value={valueTab}>
+        <Box sx={{ borderBottom: 1, borderColor: "divider" }}>
+          <TabList onChange={handleChangeTab} aria-label="lab API tabs example">
+            <Tab label="Registrar Exercícios" value="1" />
+            <Tab label="Registrar Treinos" value="2" />
+          </TabList>
+        </Box>
+        <TabPanel value="1">
+          <Button
+            variant="contained"
+            sx={{
+              my: 5,
+            }}
+            onClick={handleOpen}
+          >
+            <Typography variant="h7" textAlign="center">
+              Enviar Treino
+            </Typography>
+          </Button>
+          <Container sx={{ pb: 10 }}>
+            <MaterialReactTable table={table} />
+          </Container>
+        </TabPanel>
+        <TabPanel value="2">Item Two</TabPanel>
+      </TabContext>
 
-
-      <Button
-        variant="contained"
-        sx={{
-          my: 5,
-        }}
-        onClick={handleOpen}
-      >
-        <Typography variant="h7" textAlign="center">
-          Enviar Treino
-        </Typography>
-      </Button>
-
-      <Container sx={{ pb: 10 }}>
-        <MaterialReactTable table={table} />
-      </Container>
       {/* Modal Submit */}
       <Modal
         aria-labelledby="transition-modal-title"

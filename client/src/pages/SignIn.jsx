@@ -73,10 +73,11 @@ function Signin() {
       dispatch(snackBarMessageSuccess('Bem vindo ' + response.data.username + '!'));
       history("/");
     } catch (error) {
+      console.log(error, "ERROR");
       if (error.response.status === 404 || 401) {
         dispatch(snackBarMessageError(error.response.data.error));
       }
-      console.log(e);
+   
     }
   };
 
