@@ -227,7 +227,17 @@ export default function Header() {
               <ListItem disablePadding>
                 <ListItemButton>
                   <ListItemIcon>
-                    <HomeIcon />
+                    {/* <HomeIcon /> */}
+                    <CardMedia
+                    sx={{width: '1em',
+                      height: '1em',
+                      display: 'inline-block',
+                      fontSize: '1.5rem'
+                    }}
+                    component="img"
+                    image={gymBroLogoSvg}
+                    />
+                  
                   </ListItemIcon>
                   <ListItemText>Adicionar Treino</ListItemText>
                 </ListItemButton>

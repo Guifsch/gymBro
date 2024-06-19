@@ -31,19 +31,19 @@ const axiosConfig = () => {
       return response;
     },
     (error) => {
-      if (error.response.status === 404) {
-        dispatch(signOut());
-      }
+    
       if (!error.response) {
         dispatch(snackBarMessageError("Ops, ocorreu um erro, verifique sua conexão!"));
+        dispatch(signOut());
       }
-      if (error.response.statusText === "Unauthorized") {
+      else if (error.response.statusText === "Unauthorized" || error.response.statusText === "Not Found") {
         dispatch(snackBarMessageError(error.response.data.error))
         console.log(error, "interceptor response Error");
         history("/sign-in");
         dispatch(signOut());
        
       }
+      console.log(error, "interceptor request Error")
       return Promise.reject(error);
     }
   );

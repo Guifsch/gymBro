@@ -74,9 +74,12 @@ function Signin() {
       history("/");
     } catch (error) {
       console.log(error, "ERROR");
-      if (error.response.status === 404 || 401) {
+      // if (error.response.status === 404 || 401) {
+      //   dispatch(snackBarMessageError(error.response.data.error));
+      // }
+
         dispatch(snackBarMessageError(error.response.data.error));
-      }
+     
    
     }
   };

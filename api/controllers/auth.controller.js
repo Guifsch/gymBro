@@ -13,6 +13,12 @@ export const signup = async (req, res, next) => {
   });
 
   try {
+    const findExistUsername = await User.findOne({ username: username });
+    if (findExistUsername)
+      return next(errorHandler(500, "Um usuário com esse nome já existe, tente outro!"));
+    const findExistEmail = await User.findOne({ email: email });
+    if (findExistEmail)
+      return next(errorHandler(500, "Um usuário com esse email já existe, tente outro!"));
     await newUser.save();
     res.status(201).json({ message: "Usuário criado com sucesso" });
   } catch (error) {
@@ -31,7 +37,8 @@ export const signin = async (req, res, next) => {
       return next(errorHandler(401, "Usuário ou senha incorreto"));
     const token = jwt.sign({ id: validUser._id }, process.env.JWT_SECRET); // Tokken com o segredo
     const { password: hashedPassword, ...resto } = validUser._doc; // Não retornar a senha com a resposta apenas o "resto" do login como medida de segurança
-    const expiryDate = new Date(Date.now() + 3600000); // 1hora
+    // const expiryDate = new Date(Date.now() + 3600000); // 1hora
+    const expiryDate = new Date(Date.now() + 9999999); // ao infinito e alem
     // const expiryDate = new Date(Date.now() + 3600); // 3segundos
     res
       .cookie("access_token", token, { httpOnly: true, expires: expiryDate })

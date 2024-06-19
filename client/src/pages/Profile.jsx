@@ -27,6 +27,7 @@ import {
   uploadBytesResumable,
   ref,
   getDownloadURL,
+  deleteObject
 } from "firebase/storage";
 import { app } from "../firebase";
 
@@ -45,35 +46,24 @@ function Profile() {
     username: "",
     email: "",
     password: "",
-    profilePicture: ""
+    profilePicture: "",
   });
-  const [defaultFormData, setDefaultFormData] = useState({});
+
   const { currentUser } = useSelector((state) => state.user);
-  const [hover, setHover] = useState(false);
 
-
-
-
-
-
-
-
-  
   const getUserProfile = useCallback(async () => {
     try {
       const response = await axiosInterceptor.get(
         `/api/user/find/${currentUser._id}`,
         { withCredentials: true }
-      ); 
-      setFormData(response.data)
-      console.log(response.data, "PROFILE");
+      );
+      setFormData(response.data);
+      console.log(currentUser._id, "PROFILE");
     } catch (e) {
       console.log(e, "erro");
     }
   }, []);
 
-
-  
   useEffect(() => {
     getUserProfile();
   }, [getUserProfile]);
@@ -134,7 +124,6 @@ function Profile() {
     }
   };
 
-
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.id]: e.target.value });
   };
@@ -163,13 +152,14 @@ function Profile() {
       setImageError(true);
       console.log(e, "erro");
     }
-    getUserProfile()
+    getUserProfile();
     dispatch(loadingFalse());
   };
 
   const handleDeleteAccount = async (e) => {
     e.preventDefault();
     try {
+      await removeImageFirebase(formData.profilePicture);
       const response = await axiosInterceptor.delete(
         `/api/user/delete/${currentUser._id}`,
         { withCredentials: true }
@@ -178,6 +168,16 @@ function Profile() {
       dispatch(deleteUserSuccess(response.data)); //loading, error para false e o envio do action.payload vindo do userSlice
     } catch (e) {
       console.log(e, "erro");
+    }
+  };
+
+  const removeImageFirebase = async (img) => {
+    try {
+      const storage = getStorage(app);
+      const imageRef = ref(storage, img);
+      deleteObject(imageRef);
+    } catch (e) {
+      console.log(e);
     }
   };
 
@@ -230,8 +230,7 @@ function Profile() {
               onChange={(e) => profileImage(e)}
             />
             <CardMedia
-            component="img"
-
+              component="img"
               sx={{
                 objectFit: "cover",
                 cursor: "pointer",
@@ -244,10 +243,7 @@ function Profile() {
                   transition: "0.5s",
                 },
               }}
-          
-              image={
-                 imagePreview ||  formData.profilePicture  
-              }
+              image={imagePreview || formData.profilePicture}
             ></CardMedia>
             <CreateIcon
               sx={{
@@ -294,7 +290,7 @@ function Profile() {
           >
             <AccountCircle sx={{ color: "action.active", mr: 1, my: 0.5 }} />
             <TextField
-                    onChange={handleChange}
+              onChange={handleChange}
               value={formData.username}
               type="username"
               required
@@ -323,7 +319,6 @@ function Profile() {
             <AccountCircle sx={{ color: "action.active", mr: 1, my: 0.5 }} />
             <TextField
               onChange={handleChange}
-              
               value={formData.email}
               type="email"
               required
@@ -345,7 +340,7 @@ function Profile() {
           <Box sx={{ display: "flex", alignItems: "flex-end" }}>
             <LockIcon sx={{ color: "action.active", mr: 1, my: 0.5 }} />
             <TextField
-                   onChange={handleChange}
+              onChange={handleChange}
               type="password"
               id="password"
               label="Senha"
