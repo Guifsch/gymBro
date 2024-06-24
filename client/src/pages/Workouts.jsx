@@ -1,95 +1,49 @@
-import Backdrop from "@mui/material/Backdrop";
 import { useMemo } from "react";
 import {
   MaterialReactTable,
   useMaterialReactTable,
 } from "material-react-table";
 import ModalWorkout from "../components/ModalWorkout";
-import { Container } from "@mui/material";
-
 import Tab from "@mui/material/Tab";
 import { TabContext, TabPanel, TabList } from "@mui/lab";
 import WorkoutSerie from "../components/WorkoutSerie";
-
-import Modal from "@mui/material/Modal";
-import Fade from "@mui/material/Fade";
 import Button from "@mui/material/Button";
-
-import { TextField } from "@mui/material";
 import React, { useCallback, useState, useEffect } from "react";
-import CardMedia from "@mui/material/CardMedia";
 import axiosConfig from "../utils/axios";
 import Typography from "@mui/material/Typography";
 import IconButton from "@mui/material/IconButton";
-import CircularProgress from "@mui/material/CircularProgress";
-import { Edit, Delete } from "@mui/icons-material";
 import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
-import CloseIcon from "@mui/icons-material/Close";
 import Loading from "../components/Loading";
-import { useSelector, useDispatch } from "react-redux";
+import { useDispatch } from "react-redux";
 import { loadingTrue, loadingFalse } from "../redux/loading/loadingSlice";
-import {
-  signInStart,
-  signInSuccess,
-  signInFailure,
-  deleteUserSuccess,
-  updateUserSuccess,
-  signOut,
-} from "../redux/user/userSlice";
-import {
-  snackBarMessageSuccess,
-  snackBarMessageError,
-} from "../redux/snackbar/snackBarSlice";
-import {
-  getStorage,
-  uploadBytesResumable,
-  ref,
-  getDownloadURL,
-  deleteObject,
-} from "firebase/storage";
+import { snackBarMessageSuccess } from "../redux/snackbar/snackBarSlice";
+import { getStorage, ref, deleteObject } from "firebase/storage";
 import { app } from "../firebase";
-import { Box } from "@mui/material";
-const style = {
-  position: "absolute",
-  top: "50%",
-  left: "50%",
-  transform: "translate(-50%, -50%)",
-  width: 600,
-  height: 700,
-  bgcolor: "background.paper",
-  border: "2px solid #000",
-  boxShadow: 24,
-};
+import { Box, Container } from "@mui/material";
+import ModalWorkoutCategory from "../components/ModalWorkoutCategory";
 
 export default function Workouts() {
   const axiosInterceptor = axiosConfig();
   const dispatch = useDispatch();
   const [valueTab, setValueTab] = React.useState("1");
-  const [open, setOpen] = React.useState(false);
-  const [openUpdate, setOpenUpdate] = React.useState(false);
-  const [openShowImage, setOpenShowImage] = React.useState(false);
-  const [images, setImages] = React.useState([]);
-  const [image, setImage] = useState(undefined);
-  const [imagePreview, setImagePreview] = useState(null);
-  const [loading, setLoading] = useState(false);
+  const [modalWorkoutCategoryRefreshRef, setModalWorkoutCategoryRefreshRef] =
+    React.useState("1");
+  const [openWorkoutModal, setOpenWorkoutModal] = React.useState(false);
+  const [openCategoryModal, setOpenCategoryModal] = React.useState(false);
+  const [categoryInputClean, setCategoryInputClean] = React.useState(1);
   const [imageTableShow, setImageTableShow] = useState(undefined);
-  const [imagePercent, setImagePercent] = useState(0);
-  const [imageError, setImageError] = useState(false);
-  const [content, setContent] = useState({});
-  const [test, setTest] = useState(false);
   const [modalContentUpdate, setModalContentUpdate] = useState({
     name: "",
     rep: "",
     set: "",
     weight: "",
+    category: "",
     exercisePicture: "",
+    comment: "",
   });
   const [workouts, setWorkouts] = useState([]);
   const [getWorkoutRefUpdate, setGetWorkoutRefUpdate] = useState([]);
-
-  const [modalContent, setModalContent] = useState({});
-  const { currentUser } = useSelector((state) => state.user);
 
   const handleChangeTab = (event, newValue) => {
     setValueTab(newValue);
@@ -102,9 +56,7 @@ export default function Workouts() {
       });
       setWorkouts(response.data.workouts);
       console.log(response.data.workouts, "workouts");
-      setImagePreview(undefined);
     } catch (e) {
-      setImageError(true);
       console.log(e, "erro");
     }
   }, []);
@@ -112,6 +64,12 @@ export default function Workouts() {
   const getWorkoutRef = useCallback(async (e) => {
     setGetWorkoutRefUpdate(e);
     console.log("pagina atualizada", e);
+  }, []);
+
+  const refreshModalRef = useCallback(async (e) => {
+    setModalWorkoutCategoryRefreshRef(e);
+
+    console.log("TESTEEEE", e);
   }, []);
 
   useEffect(() => {
@@ -132,13 +90,18 @@ export default function Workouts() {
         size: 150,
       },
       {
-        accessorKey: "set", //normal accessorKey
+        accessorKey: "set",
         header: "Sets",
         size: 150,
       },
       {
         accessorKey: "weight",
         header: "Peso",
+        size: 150,
+      },
+      {
+        accessorKey: "category[0].name",
+        header: "Categoria",
         size: 150,
       },
 
@@ -212,131 +175,6 @@ export default function Workouts() {
     data: workouts,
   });
 
-  // const handleChange = (e) => {
-  //   setContent({ ...content, [e.target.id]: e.target.value });
-  //   console.log(content, "CONTENT");
-  // };
-
-  // const handleChangeUpdate = (e) => {
-  //   console.log(modalContentUpdate, "CONTENT");
-  //   setModalContentUpdate({
-  //     ...modalContentUpdate,
-  //     [e.target.id]: e.target.value,
-  //   });
-  // };
-  // const profileImage = async (e) => {
-  //   const image = e.target.files[0];
-
-  //   setImage(image);
-  //   let fileReader;
-  //   if (image) {
-  //     fileReader = new FileReader();
-  //     fileReader.onload = (e) => {
-  //       const { result } = e.target;
-  //       if (result) {
-  //         setImagePreview(result);
-  //       }
-  //     };
-  //     fileReader.readAsDataURL(image);
-  //   }
-  // };
-
-  // const handleFileUpload = async (image) => {
-  //   try {
-  //     const storage = getStorage(app);
-  //     console.log(storage, "STORAGE");
-  //     // const newDirectory = currentUser.username;
-  //     const fileName = new Date().getTime() + image.name;
-  //     // const storageRef = ref(storage, `${newDirectory}/${fileName}`);
-  //     const storageRef = ref(storage, fileName);
-
-  //     const uploadTaskPromise = (fileRef, file) => {
-  //       return new Promise((resolve, reject) => {
-  //         const uploadTask = uploadBytesResumable(fileRef, file);
-
-  //         uploadTask.on(
-  //           "state_changed",
-  //           (snapshot) => {
-  //             const progress =
-  //               (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
-  //             console.log("Upload is " + progress + "% done");
-  //           },
-  //           (error) => {
-  //             reject(error);
-  //           },
-  //           () => {
-  //             resolve(uploadTask.snapshot.ref);
-  //           }
-  //         );
-  //       });
-  //     };
-
-  //     const fileRef = await uploadTaskPromise(storageRef, image);
-  //     const downloadURL = await getDownloadURL(fileRef);
-
-  //     return downloadURL;
-  //   } catch (error) {
-  //     console.error("Error uploading file:", error);
-  //     throw error;
-  //   }
-  // };
-
-  // const submitWorkout = async (e) => {
-  //   e.preventDefault();
-  //   setLoading(true);
-  //   try {
-  //     let updatedContent = { ...content };
-
-  //     if (imagePreview) {
-  //       const imageUrl = await handleFileUpload(image);
-  //       console.log(imageUrl, "imageUrl");
-  //       updatedContent = { ...updatedContent, exercisePicture: imageUrl };
-  //     }
-
-  //     const response = await axiosInterceptor.post(
-  //       `/api/workout/workouts`,
-  //       updatedContent,
-  //       { withCredentials: true }
-  //     );
-  //     dispatch(snackBarMessageSuccess("Treino salvo"));
-  //     setImagePreview(undefined);
-  //     getWorkout();
-  //   } catch (e) {
-  //     dispatch(snackBarMessageError("Arquivo inválido!"));
-
-  //     console.log(e, "erro");
-  //   }
-  //   setLoading(false);
-  //   setImagePreview(undefined);
-  // };
-
-  // const updateWorkout = async (e) => {
-  //   e.preventDefault();
-  //   setLoading(true);
-  //   try {
-  //     let workoutUpdated = { ...modalContentUpdate };
-
-  //     if (imagePreview) {
-  //       const imageUrl = await handleFileUpload(image);
-  //       workoutUpdated = { ...workoutUpdated, exercisePicture: imageUrl };
-  //       console.log(imageUrl, "imageUrl");
-  //     }
-
-  //     const response = await axiosInterceptor.post(
-  //       `/api/workout/update/${workoutUpdated._id}`,
-  //       workoutUpdated,
-  //       { withCredentials: true }
-  //     );
-  //     console.log(response, "updateworkoutresponse");
-  //     dispatch(snackBarMessageSuccess("Atualização completa"));
-  //     setImagePreview(undefined);
-  //   } catch (e) {
-  //     dispatch(snackBarMessageError("Arquivo inválido!"));
-  //   }
-  //   getWorkout();
-  //   setLoading(false);
-  // };
-
   const handleDeleteExercisePicture = async (e) => {
     dispatch(loadingTrue());
     console.log(e, "gustavo");
@@ -368,41 +206,40 @@ export default function Workouts() {
 
   const handleShowImage = (e) => {
     setImageTableShow(e);
-    setOpen(true);
-  };
-  // const handleCloseShowImage = () => {
-  //   setImagePreview(null);
-  //   setOpenShowImage(false);
-  // };
-
-  const handleOpen = (e) => {
-    setOpen(true);
+    setOpenWorkoutModal(true);
   };
 
-  const handleClose = () => {
+  const handleOpenWorkoutModal = () => {
+    setOpenWorkoutModal(true);
+  };
+
+  const handleCloseWorkoutModal = (e) => {
+    setCategoryInputClean(prevCount => prevCount + 1)
     setModalContentUpdate({
       name: "",
       rep: "",
       set: "",
       weight: "",
+      category: "",
+      comment: "",
       exercisePicture: "",
     });
-    setOpen(false);
+    setOpenWorkoutModal(false);
     setImageTableShow(undefined);
   };
 
-  const handleOpenUpdate = (e) => {
-    console.log(e, "EEEE");
-
-    setModalContentUpdate(e);
-    setOpen(true);
-    // setOpenUpdate(true);
+  const handleOpenCategoryModal = (e) => {
+    setOpenCategoryModal(true);
   };
 
-  // const handleCloseUpdate = () => {
-  //   setOpen(false);
-  //   // setOpenUpdate(false);
-  // };
+  const handleCloseCategoryModal = () => {
+    setOpenCategoryModal(false);
+  };
+
+  const handleOpenUpdate = (e) => {
+    setModalContentUpdate(e);
+    setOpenWorkoutModal(true);
+  };
 
   return (
     <Box className="flex flex-col justify-initial items-center pageMarginTopNavFix">
@@ -419,543 +256,66 @@ export default function Workouts() {
           className="flex flex-col justify-initial items-center"
           sx={{ width: "100%" }}
         >
-          <Button
-            variant="contained"
+          <Container
             sx={{
-              mt: 0,
-              mb: '25px'
+              display: "flex",
+              justifyContent: "center",
             }}
-            onClick={handleOpen}
           >
-            <Typography variant="h7" textAlign="center">
-              Enviar Treino
-            </Typography>
-          </Button>
+            <Button
+              variant="contained"
+              sx={{
+                mt: 0,
+                mb: "25px",
+                mr: "20px",
+              }}
+              onClick={handleOpenWorkoutModal}
+            >
+              <Typography variant="h7" textAlign="center">
+                Enviar Treino
+              </Typography>
+            </Button>
+            <Button
+              variant="contained"
+              sx={{
+                mt: 0,
+                mb: "25px",
+                ml: "20px",
+              }}
+              onClick={handleOpenCategoryModal}
+            >
+              <Typography variant="h7" textAlign="center">
+                Criar categorias
+              </Typography>
+            </Button>
+          </Container>
           <Box sx={{ pb: 10, width: "100%" }}>
-            <MaterialReactTable table={table}
-             />
+            <MaterialReactTable table={table} />
           </Box>
         </TabPanel>
-        <TabPanel value="2"><WorkoutSerie/></TabPanel>
+        <TabPanel
+          className="flex flex-col justify-initial items-center"
+          sx={{ width: "100%" }}
+          value="2"
+        >
+          <WorkoutSerie />
+        </TabPanel>
       </TabContext>
+      <ModalWorkoutCategory
+        open={openCategoryModal}
+        handleClose={handleCloseCategoryModal}
+        getWorkoutRef={getWorkoutRef}
+        modalWorkoutCategoryRefreshRef={refreshModalRef}
+      />
       <ModalWorkout
-        open={open}
-        handleClose={handleClose}
+        open={openWorkoutModal}
+        handleClose={handleCloseWorkoutModal}
         getWorkoutRef={getWorkoutRef}
         modalContentUpdate={modalContentUpdate}
-        modalImageShow={imageTableShow} />
-      {/* Modal Submit */}
-      {/* <Modal
-        aria-labelledby="transition-modal-title"
-        aria-describedby="transition-modal-description"
-        open={open}
-        onClose={handleClose}
-        closeAfterTransition
-        slots={{ backdrop: Backdrop }}
-        slotProps={{
-          backdrop: {
-            timeout: 500,
-            position: "relative",
-          },
-        }}
-      >
-        <Fade in={open}>
-          <Box sx={style}>
-            <IconButton
-              onClick={handleClose}
-              size="large"
-              sx={{
-                position: "absolute",
-                top: "5px",
-                right: "10px",
-                zIndex: "999",
-              }}
-              aria-label="back"
-              color="primary"
-            >
-              <CloseIcon fontSize="inherit" />
-            </IconButton>
-            <Box
-              sx={{
-                position: "relative",
-                height: "100%",
-                width: "100%",
-              }}
-            >
-              {loading ? (
-                <Box
-                  sx={{
-                    transition:
-                      "opacity 225ms cubic-bezier(0.4, 0, 0.2, 1) 0ms",
-                    opacity: "1",
-                    position: "absolute",
-                    backgroundColor: "rgba(0, 0, 0, 0.5)",
-                    height: "100%",
-                    width: "100%",
-                    left: "0",
-                    top: "0",
-                    zIndex: "9999",
-                  }}
-                >
-                  <CircularProgress
-                    sx={{
-                      width: "80px!important",
-                      height: "80px!important",
-                      position: "absolute",
-                      left: "43%",
-                      top: "43%",
-                    }}
-                  />
-                </Box>
-              ) : (
-                false
-              )}
-              <Box
-                className="boxDad"
-                component="form"
-                onSubmit={submitWorkout}
-                sx={{
-                  "&:hover > svg": {
-                    visibility: "visible",
-                    transition: "0.5s",
-                    opacity: 1,
-                  },
-                  display: "flex",
-                  flexDirection: "column",
-                  alignItems: "center",
-                }}
-              >
-                <Container
-                  sx={{
-                    display: "flex",
-                    flexWrap: "wrap",
-                    justifyContent: "space-around",
-                    paddingTop: "50px",
-                  }}
-                >
-                  <TextField
-                    onChange={handleChange}
-                    type="name"
-                    required
-                    id="name"
-                    label="Nome"
-                    variant="standard"
-                    autoComplete="on"
-                    sx={{
-                      width: "40%",
-                      marginRight: "5%",
-                      marginBottom: '3%'
-
-                    }}
-                  />
-                  <TextField
-                    onChange={handleChange}
-                    type="rep"
-                    required
-                    id="rep"
-                    label="Repetições"
-                    variant="standard"
-                    autoComplete="on"
-                    sx={{
-                      width: "40%",
-                      marginRight: "5%",
-                           marginBottom: '3%'
-                    }}
-                  />
-                  <TextField
-                    onChange={handleChange}
-                    type="set"
-                    required
-                    id="set"
-                    label="Sets"
-                    variant="standard"
-                    autoComplete="on"
-                    sx={{
-                      width: "40%",
-                      marginRight: "5%",
-                    }}
-                  />
-                  <TextField
-                    onChange={handleChange}
-                    type="weight"
-                    required
-                    id="weight"
-                    label="Peso"
-                    variant="standard"
-                    autoComplete="on"
-                    sx={{
-                      width: "40%",
-                      marginRight: "5%",
-                    }}
-                  />
-                </Container>
-                <Button
-                  sx={{
-                    mt: 5,
-                  }}
-                  variant="contained"
-                  type="submit"
-                >
-                  Salvar
-                </Button>
-                <Container
-                  sx={{
-                    display: "flex",
-                    flexDirection: "column",
-                    alignItems: "center",
-                    my: 5,
-                  }}
-                >
-                  <input
-                    type="file"
-                    accept="image/png, image/jpeg"
-                    placeholder="Type some text"
-                    onChange={(e) => profileImage(e)}
-                  />
-                  {imagePreview ? (
-                    <CardMedia
-                      component="img"
-                      sx={{
-                        objectFit: "cover",
-                        mt: 5,
-                        height: "300px",
-                        width: "450px",
-                      }}
-                      image={imagePreview}
-                    />
-                  ) : (
-                    <Typography
-                      sx={{
-                        display: "flex",
-                        flexDirection: "column",
-                        alignItems: "center",
-                        my: 5,
-                      }}
-                      variant="h5"
-                    >
-                      Selecione sua imagem
-                    </Typography>
-                  )}
-                </Container>
-                <Container
-                  sx={{
-                    display: "flex",
-                    alignItems: "flex-end",
-                    justifyContent: "space-evenly",
-                    mt: 3,
-                  }}
-                ></Container>
-              </Box>
-            </Box>
-          </Box>
-        </Fade>
-      </Modal> */}
-
-      {/* Modal Edit */}
-      {/* <Modal
-        aria-labelledby="transition-modal-title"
-        aria-describedby="transition-modal-description"
-        open={openUpdate}
-        onClose={handleCloseUpdate}
-        closeAfterTransition
-        slots={{ backdrop: Backdrop }}
-        slotProps={{
-          backdrop: {
-            timeout: 500,
-            position: "relative",
-          },
-        }}
-      >
-        <Fade in={openUpdate}>
-          <Box sx={style}>
-            <IconButton
-              onClick={handleCloseUpdate}
-              size="large"
-              sx={{
-                position: "absolute",
-                top: "5px",
-                right: "10px",
-                zIndex: "999",
-              }}
-              aria-label="back"
-              color="primary"
-            >
-              <CloseIcon fontSize="inherit" />
-            </IconButton>
-            <Box
-              sx={{
-                position: "relative",
-                height: "100%",
-                width: "100%",
-              }}
-            >
-              {loading ? (
-                <Box
-                  sx={{
-                    transition:
-                      "opacity 225ms cubic-bezier(0.4, 0, 0.2, 1) 0ms",
-                    opacity: "1",
-                    position: "absolute",
-                    backgroundColor: "rgba(0, 0, 0, 0.5)",
-                    height: "100%",
-                    width: "100%",
-                    left: "0",
-                    top: "0",
-                    zIndex: "9999",
-                  }}
-                >
-                  <CircularProgress
-                    sx={{
-                      width: "80px!important",
-                      height: "80px!important",
-                      position: "absolute",
-                      left: "43%",
-                      top: "43%",
-                    }}
-                  />
-                </Box>
-              ) : (
-                false
-              )}
-              <Box
-                className="boxDad"
-                component="form"
-                onSubmit={updateWorkout}
-                sx={{
-                  "&:hover > svg": {
-                    visibility: "visible",
-                    transition: "0.5s",
-                    opacity: 1,
-                  },
-                  display: "flex",
-                  flexDirection: "column",
-                  alignItems: "center",
-                }}
-              >
-                <Container
-                  sx={{
-                    display: "flex",
-                    flexWrap: "wrap",
-                    justifyContent: "space-around",
-                    paddingTop: "50px",
-                  }}
-                >
-                  <TextField
-                    onChange={handleChangeUpdate}
-                    value={modalContentUpdate.name}
-                    type="name"
-                    required
-                    id="name"
-                    label="Nome"
-                    variant="standard"
-                    autoComplete="on"
-                    sx={{
-                      width: "40%",
-                      marginRight: "5%",
-                           marginBottom: '3%'
-                    }}
-                  />
-                  <TextField
-                    onChange={handleChangeUpdate}
-                    value={modalContentUpdate.rep}
-                    type="rep"
-                    required
-                    id="rep"
-                    label="Repetições"
-                    variant="standard"
-                    autoComplete="on"
-                    sx={{
-                      width: "40%",
-                      marginRight: "5%",
-                           marginBottom: '3%'
-                    }}
-                  />
-                  <TextField
-                    onChange={handleChangeUpdate}
-                    value={modalContentUpdate.set}
-                    type="set"
-                    required
-                    id="set"
-                    label="Sets"
-                    variant="standard"
-                    autoComplete="on"
-                    sx={{
-                      width: "40%",
-                      marginRight: "5%",
-                    }}
-                  />
-                  <TextField
-                    onChange={handleChangeUpdate}
-                    value={modalContentUpdate.weight}
-                    type="weight"
-                    required
-                    id="weight"
-                    label="Peso"
-                    variant="standard"
-                    autoComplete="on"
-                    sx={{
-                      width: "40%",
-                      marginRight: "5%",
-                    }}
-                  />
-                </Container>
-                <Button
-                  sx={{
-                    mt: 5,
-                  }}
-                  variant="contained"
-                  type="submit"
-                >
-                  Salvar
-                </Button>
-                <Container
-                  sx={{
-                    display: "flex",
-                    flexDirection: "column",
-                    alignItems: "center",
-                    my: 5,
-                  }}
-                >
-                  <input
-                    type="file"
-                    accept="image/*"
-                    placeholder="Type some text"
-                    onChange={(e) => {
-                      profileImage(e);
-                    }}
-                  />
-
-                  {imagePreview == null ? (
-                    <CardMedia
-                      component="img"
-                      sx={{
-                        objectFit: "cover",
-                        mt: 5,
-                        height: "300px",
-                        width: "450px",
-                      }}
-                      image={modalContentUpdate.exercisePicture}
-                    />
-                  ) : (
-                    <CardMedia
-                      component="img"
-                      sx={{
-                        objectFit: "cover",
-                        mt: 5,
-                        height: "300px",
-                        width: "450px",
-                      }}
-                      image={imagePreview}
-                    />
-                  )}
-                </Container>
-                <Container
-                  sx={{
-                    display: "flex",
-                    alignItems: "flex-end",
-                    justifyContent: "space-evenly",
-                    mt: 3,
-                  }}
-                ></Container>
-              </Box>
-            </Box>
-          </Box>
-        </Fade>
-      </Modal> */}
-
-      {/* Modal Preview */}
-      {/* <Modal
-        aria-labelledby="transition-modal-title"
-        aria-describedby="transition-modal-description"
-        open={openShowImage}
-        onClose={handleCloseShowImage}
-        closeAfterTransition
-        slots={{ backdrop: Backdrop }}
-        slotProps={{
-          backdrop: {
-            timeout: 500,
-            position: "relative",
-          },
-        }}
-      >
-        <Fade in={openShowImage}>
-          <Box
-            sx={{
-              position: "absolute",
-              top: "50%",
-              left: "50%",
-              transform: "translate(-50%, -50%)",
-              width: "100%",
-              maxWidth: "800px",
-              maxHeight: "700px",
-              height: "100%",
-              bgcolor: "background.paper",
-              border: "2px solid #000",
-              boxShadow: 24,
-            }}
-          >
-            <IconButton
-              onClick={handleCloseShowImage}
-              size="large"
-              sx={{
-                position: "absolute",
-                top: "5px",
-                right: "10px",
-                zIndex: "999",
-              }}
-              aria-label="back"
-              color="primary"
-            >
-              <CloseIcon fontSize="inherit" />
-            </IconButton>
-            <Box
-              sx={{
-                display: "flex",
-                flexDirection: "column",
-                alignItems: "center",
-                height: "100%",
-                width: "100%",
-                justifyContent: "center",
-                position: "relative",
-              }}
-            >
-              <Box
-                className="boxDad"
-                sx={{
-                  "&:hover > svg": {
-                    visibility: "visible",
-                    transition: "0.5s",
-                    opacity: 1,
-                  },
-                  display: "flex",
-                  flexDirection: "column",
-                  alignItems: "center",
-                }}
-              >
-                <Box
-                  sx={{
-                    display: "flex",
-                    flexDirection: "column",
-                    alignItems: "center",
-                  }}
-                >
-                  <CardMedia
-                    component="img"
-                    sx={{
-                      objectFit: "contain",
-                      maxHeight: "400px",
-                      maxWidth: "450px",
-                      height: "100%",
-                      width: "100%",
-                    }}
-                    image={imageTableShow}
-                  />
-                </Box>
-              </Box>
-            </Box>
-          </Box>
-        </Fade>
-      </Modal> */}
+        modalImageShow={imageTableShow}
+        refreshModalRef={modalWorkoutCategoryRefreshRef}
+        categoryInputClean={categoryInputClean}
+      />
     </Box>
   );
 }

@@ -2,11 +2,18 @@ import Modal from "@mui/material/Modal";
 import Fade from "@mui/material/Fade";
 import IconButton from "@mui/material/IconButton";
 import Typography from "@mui/material/Typography";
+import { styled } from "@mui/material/styles";
 import Button from "@mui/material/Button";
 import CloseIcon from "@mui/icons-material/Close";
 import CardMedia from "@mui/material/CardMedia";
+import FormControlLabel from "@mui/material/FormControlLabel";
+import Switch from "@mui/material/Switch";
 import { TextField } from "@mui/material";
 import Backdrop from "@mui/material/Backdrop";
+import InputLabel from "@mui/material/InputLabel";
+import MenuItem from "@mui/material/MenuItem";
+import FormControl from "@mui/material/FormControl";
+import Select from "@mui/material/Select";
 import CircularProgress from "@mui/material/CircularProgress";
 import { loadingTrue, loadingFalse } from "../redux/loading/loadingSlice";
 import {
@@ -40,8 +47,8 @@ const style = {
   top: "50%",
   left: "50%",
   transform: "translate(-50%, -50%)",
-  width: 600,
-  height: 700,
+  width: 1000,
+  height: 800,
   bgcolor: "background.paper",
   border: "2px solid #000",
   boxShadow: 24,
@@ -53,6 +60,8 @@ export default function ModalWorkout({
   getWorkoutRef,
   modalContentUpdate,
   modalImageShow,
+  refreshModalRef,
+  categoryInputClean
 }) {
   const axiosInterceptor = axiosConfig();
   // const [openModal, setOpenModal] = React.useState(false);
@@ -63,16 +72,51 @@ export default function ModalWorkout({
     set: "",
     weight: "",
     exercisePicture: "",
+    comment: "",
   });
   const [loading, setLoading] = useState(false);
   const [imagePreview, setImagePreview] = useState(null);
   const [image, setImage] = useState(undefined);
+  const [workoutsCategorys, setWorkoutsCategorys] = useState([]);
+  const [selectedOption, setSelectedOption] = useState("");
   const { currentUser } = useSelector((state) => state.user);
   useEffect(() => {
     try {
+      console.log(modalContentUpdate, "modalContentUpdate")
+      setSelectedOption(modalContentUpdate.category)
       setContent(modalContentUpdate);
     } catch {}
   }, [modalContentUpdate]);
+
+  useEffect(() => {
+ 
+    setSelectedOption(null)
+
+    console.log(categoryInputClean, "categoryInputClean")
+  }, [categoryInputClean]);
+
+ 
+
+  useEffect(() => {
+   getWorkoutCategorys()
+  }, [refreshModalRef]);
+  const getWorkoutCategorys = useCallback(async () => {
+    try {
+      const response = await axiosInterceptor.get(`/api/workout/categorys`, {
+        withCredentials: true,
+      });
+      console.log(response.data[0].categoryItems, "workoutsCategorys");
+      if (response.data.length > 0) {
+        setWorkoutsCategorys(response.data[0].categoryItems);
+      }
+    } catch (e) {
+      console.log(e, "erro");
+    }
+  }, []);
+
+  useEffect(() => {
+    getWorkoutCategorys();
+  }, [getWorkoutCategorys]);
 
   const getWorkoutRefValue = (e) => {
     getWorkoutRef(e);
@@ -83,6 +127,41 @@ export default function ModalWorkout({
     console.log(content, "CONTENT");
   };
 
+  const handleChangeCategory = (event) => {
+    const selectedId = event.target.value;
+    setSelectedOption(selectedId);
+
+    // Verificar se selectedId não é uma string vazia
+    if (selectedId !== "") {
+      // Encontrar o objeto correspondente ao selectedId no array de workoutsCategorys
+      const selectedOptionObject = workoutsCategorys.find(option => option._id === selectedId);
+      console.log(selectedOptionObject, "selectedOptionObject")
+
+      // Verificar se selectedOptionObject foi encontrado
+      if (selectedOptionObject) {
+        // Atualizar o conteúdo com a nova selectedOption e category
+        setContent(prevContent => ({
+          ...prevContent,
+          selectedOption: selectedOptionObject,
+          category: selectedOptionObject
+        }));
+      } else {
+        // Caso selectedOptionObject não seja encontrado, limpar o conteúdo relacionado à opção selecionada
+        setContent(prevContent => ({
+          ...prevContent,
+          selectedOption: null, // Limpa selectedOption
+          category: '' // Limpa category
+        }));
+      }
+    } else {
+      // Caso selecionado "Nenhum", limpar o conteúdo relacionado à opção selecionada
+      setContent(prevContent => ({
+        ...prevContent,
+        selectedOption: null, // Limpa selectedOption
+        category: '' // Limpa category
+      }));
+    }
+  };
   const profileImage = async (e) => {
     const image = e.target.files[0];
 
@@ -164,13 +243,17 @@ export default function ModalWorkout({
       console.log(e, "erro");
     }
     setLoading(false);
-    setContent({   name: "",
+    setContent({
+      name: "",
       rep: "",
       set: "",
       weight: "",
-      exercisePicture: "",})
+      exercisePicture: "",
+      category: "",
+      comment: "",
+    });
     setImagePreview(undefined);
-    getWorkoutRefValue(1);
+    getWorkoutRefValue(prevCount => prevCount + 1);
   };
 
   const submitWorkoutUpdate = async () => {
@@ -179,7 +262,7 @@ export default function ModalWorkout({
       let workoutUpdated = { ...content };
       if (imagePreview) {
         await removeImageFirebase(modalContentUpdate.exercisePicture);
-        console.log(content.profilePicture, "content.profilePicture")
+        console.log(content.profilePicture, "content.profilePicture");
         const imageUrl = await handleFileUpload(image);
         workoutUpdated = { ...workoutUpdated, exercisePicture: imageUrl };
         console.log(imageUrl, "imageUrl");
@@ -196,7 +279,7 @@ export default function ModalWorkout({
     } catch (e) {
       dispatch(snackBarMessageError("Arquivo inválido!"));
     }
-    getWorkoutRefValue(2);
+    getWorkoutRefValue(prevCount => prevCount + 1);
     setLoading(false);
     setImagePreview(undefined);
   };
@@ -211,13 +294,12 @@ export default function ModalWorkout({
     }
   };
 
-
   return (
     <Modal
       aria-labelledby="transition-modal-title"
       aria-describedby="transition-modal-description"
       open={open}
-      onClose={handleClose}
+      onClose={() => handleClose("teste")}
       closeAfterTransition
       slots={{ backdrop: Backdrop }}
       slotProps={{
@@ -229,7 +311,8 @@ export default function ModalWorkout({
     >
       <Box sx={style}>
         <IconButton
-          onClick={handleClose}
+
+          onClick={() => handleClose("teste")}
           size="large"
           sx={{
             position: "absolute",
@@ -242,210 +325,279 @@ export default function ModalWorkout({
         >
           <CloseIcon fontSize="inherit" />
         </IconButton>
-       
-          {loading ? (
-            <Box
+        <Typography
+          textAlign="center"
+          sx={{
+            position: "absolute",
+            right: "40%",
+            left: "40%",
+            top: "5px",
+            fontSize: "0.8em",
+            color: "red",
+          }}
+        >
+          campos com * são obrigatórios...
+        </Typography>
+        {loading ? (
+          <Box
+            sx={{
+              transition: "opacity 225ms cubic-bezier(0.4, 0, 0.2, 1) 0ms",
+              opacity: "1",
+              position: "absolute",
+              backgroundColor: "rgba(0, 0, 0, 0.5)",
+              height: "100%",
+              width: "100%",
+              left: "0",
+              top: "0",
+              zIndex: "9999",
+            }}
+          >
+            <CircularProgress
               sx={{
-                transition: "opacity 225ms cubic-bezier(0.4, 0, 0.2, 1) 0ms",
-                opacity: "1",
+                width: "80px!important",
+                height: "80px!important",
                 position: "absolute",
-                backgroundColor: "rgba(0, 0, 0, 0.5)",
+                left: "43%",
+                top: "43%",
+              }}
+            />
+          </Box>
+        ) : (
+          false
+        )}
+        {modalImageShow ? (
+          // Modal Show
+          <Box
+            sx={{
+              display: "flex",
+              flexDirection: "column",
+              justifyContent: "center",
+              alignItems: "center",
+              width: "100%",
+              height: "100%",
+            }}
+          >
+            <CardMedia
+              component="img"
+              sx={{
+                objectFit: "contain",
+                maxHeight: "400px",
+                maxWidth: "450px",
                 height: "100%",
                 width: "100%",
-                left: "0",
-                top: "0",
-                zIndex: "9999",
+              }}
+              image={modalImageShow}
+            />
+          </Box>
+        ) : (
+          // Modal Sent or Update
+          <Box
+            className="boxDad"
+            sx={{
+              "&:hover > svg": {
+                visibility: "visible",
+                transition: "0.5s",
+                opacity: 1,
+              },
+              display: "flex",
+              flexDirection: "column",
+              alignItems: "center",
+            }}
+          >
+            <Container
+              sx={{
+                display: "flex",
+                flexWrap: "wrap",
+                justifyContent: "space-around",
+                paddingTop: "50px",
               }}
             >
-              <CircularProgress
+              <TextField
+                onChange={handleChange}
+                type="name"
+                required
+                id="name"
+                value={content.name}
+                label="Nome"
+                variant="standard"
+                autoComplete="on"
                 sx={{
-                  width: "80px!important",
-                  height: "80px!important",
-                  position: "absolute",
-                  left: "43%",
-                  top: "43%",
+                  width: "26%",
+                  marginRight: "5%",
                 }}
               />
-            </Box>
-          ) : (
-            false
-          )}
-          {modalImageShow ? (
-            // Modal Show
-              <Box
+              <TextField
+                onChange={handleChange}
+                type="rep"
+                value={content.rep}
+                required
+                id="rep"
+                label="Repetições"
+                variant="standard"
+                autoComplete="on"
                 sx={{
-                  display: "flex",
-                  flexDirection: "column",
-                  justifyContent: 'center',
-                  alignItems: 'center',
-                  width: '100%',
-                  height: '100%'
-                  ,
+                  width: "26%",
+                  marginRight: "5%",
                 }}
+              />
+              <TextField
+                onChange={handleChange}
+                type="set"
+                required
+                id="set"
+                value={content.set}
+                label="Sets"
+                variant="standard"
+                autoComplete="on"
+                sx={{
+                  width: "26%",
+                  marginRight: "5%",
+                }}
+              />
+              <TextField
+                onChange={handleChange}
+                type="weight"
+                required
+                id="weight"
+                label="Peso"
+                value={content.weight}
+                variant="standard"
+                autoComplete="on"
+                sx={{
+                  width: "26%",
+                  marginRight: "5%",
+                  marginTop: "3%",
+                }}
+              />
+              {/* <TextField
+                onChange={handleChange}
+                type="category"
+                required
+                id="category"
+                label="Categoria"
+                value={content.category}
+                variant="standard"
+                autoComplete="on"
+                sx={{
+                  width: "26%",
+                  marginRight: "5%",
+                  marginTop: "3%",
+                }}
+              /> */}
+              <Box   sx={{
+                  width: "26%",
+                  marginRight: "5%",
+                  marginTop: "3%",
+                }}>
+              <FormControl sx={{ m: 1, minWidth: 80, width: '100%' }}>
+                <InputLabel id="demo-simple-select-autowidth-label">
+                  Categoria
+                </InputLabel>
+
+                <Select
+                  labelId="demo-simple-select-autowidth-label"
+                  id="demo-simple-select-autowidth"
+                  value={selectedOption || ""}
+                  onChange={handleChangeCategory}
+                  autoWidth
+                  label="Selecione uma opção"
+                >
+                  <MenuItem value="">
+                    <em>Nenhum</em>
+                  </MenuItem>
+                  {workoutsCategorys.map((option) => (
+                    <MenuItem key={option._id} value={option._id}>
+                      {option.name}
+                    </MenuItem>
+                  ))}
+                </Select>
+              </FormControl>
+              </Box>
+              <TextField
+                id="comment"
+                label="Comentário"
+                multiline
+                type="comment"
+                value={content.comment}
+                onChange={handleChange}
+                maxRows={4}
+                sx={{
+                  "& > div": { height: "100px" },
+                  width: "26%",
+                  marginTop: "3%",
+                  marginRight: "5%",
+                }}
+              />
+            </Container>
+            {/* Button Sent or Update */}
+            {Object.values(modalContentUpdate).every(
+              (value) => value === ""
+            ) ? (
+              <Button
+                sx={{
+                  mt: 5,
+                }}
+                variant="contained"
+                type="submit"
+                onClick={submitWorkout}
               >
-                <CardMedia
-                  component="img"
-                  sx={{
-                    objectFit: "contain",
-                    maxHeight: "400px",
-                    maxWidth: "450px",
-                    height: "100%",
-                    width: "100%",
-                  }}
-                  image={modalImageShow}
-                />
-            </Box>
-          ) : (
-            // Modal Sent or Update
-            <Box
-              className="boxDad"
+                Salvar
+              </Button>
+            ) : (
+              <Button
+                sx={{
+                  mt: 5,
+                }}
+                variant="contained"
+                type="submit"
+                onClick={submitWorkoutUpdate}
+              >
+                Atualizar
+              </Button>
+            )}
+
+            <Container
               sx={{
-                "&:hover > svg": {
-                  visibility: "visible",
-                  transition: "0.5s",
-                  opacity: 1,
-                },
                 display: "flex",
                 flexDirection: "column",
                 alignItems: "center",
+                my: 5,
               }}
             >
-              <Container
-                sx={{
-                  display: "flex",
-                  flexWrap: "wrap",
-                  justifyContent: "space-around",
-                  paddingTop: "50px",
-                }}
-              >
-                <TextField
-                  onChange={handleChange}
-                  type="name"
-                  required
-                  id="name"
-                  value={content.name}
-                  label="Nome"
-                  variant="standard"
-                  autoComplete="on"
+              <input
+                type="file"
+                accept="image/png, image/jpeg"
+                placeholder="Type some text"
+                onChange={(e) => profileImage(e)}
+              />
+              {imagePreview || content.exercisePicture ? (
+                <CardMedia
+                  component="img"
                   sx={{
-                    width: "40%",
-                    marginRight: "5%",
-                    marginBottom: "3%",
-                  }}
-                />
-                <TextField
-                  onChange={handleChange}
-                  type="rep"
-                  value={content.rep}
-                  required
-                  id="rep"
-                  label="Repetições"
-                  variant="standard"
-                  autoComplete="on"
-                  sx={{
-                    width: "40%",
-                    marginRight: "5%",
-                    marginBottom: "3%",
-                  }}
-                />
-                <TextField
-                  onChange={handleChange}
-                  type="set"
-                  required
-                  id="set"
-                  value={content.set}
-                  label="Sets"
-                  variant="standard"
-                  autoComplete="on"
-                  sx={{
-                    width: "40%",
-                    marginRight: "5%",
-                  }}
-                />
-                <TextField
-                  onChange={handleChange}
-                  type="weight"
-                  required
-                  id="weight"
-                  label="Peso"
-                  value={content.weight}
-                  variant="standard"
-                  autoComplete="on"
-                  sx={{
-                    width: "40%",
-                    marginRight: "5%",
-                  }}
-                />
-              </Container>
-              {/* Button Sent or Update */}
-              {Object.values(modalContentUpdate).every(
-                (value) => value === ""
-              ) ? (
-                <Button
-                  sx={{
+                    objectFit: "cover",
                     mt: 5,
+                    height: "300px",
+                    width: "450px",
                   }}
-                  variant="contained"
-                  type="submit"
-                  onClick={submitWorkout}
-                >
-                  Salvar
-                </Button>
+                  image={imagePreview || content.exercisePicture}
+                />
               ) : (
-                <Button
+                <Typography
                   sx={{
-                    mt: 5,
+                    display: "flex",
+                    flexDirection: "column",
+                    alignItems: "center",
+                    my: 5,
                   }}
-                  variant="contained"
-                  type="submit"
-                  onClick={submitWorkoutUpdate}
+                  variant="h5"
                 >
-                  Atualizar
-                </Button>
+                  Selecione sua imagem
+                </Typography>
               )}
-
-              <Container
-                sx={{
-                  display: "flex",
-                  flexDirection: "column",
-                  alignItems: "center",
-                  my: 5,
-                }}
-              >
-                <input
-                  type="file"
-                  accept="image/png, image/jpeg"
-                  placeholder="Type some text"
-                  onChange={(e) => profileImage(e)}
-                />
-                {imagePreview || content.exercisePicture ? (
-                  <CardMedia
-                    component="img"
-                    sx={{
-                      objectFit: "cover",
-                      mt: 5,
-                      height: "300px",
-                      width: "450px",
-                    }}
-                    image={imagePreview || content.exercisePicture}
-                  />
-                ) : (
-                  <Typography
-                    sx={{
-                      display: "flex",
-                      flexDirection: "column",
-                      alignItems: "center",
-                      my: 5,
-                    }}
-                    variant="h5"
-                  >
-                    Selecione sua imagem
-                  </Typography>
-                )}
-              </Container>
-            </Box>
-          )}
-        </Box>
+            </Container>
+          </Box>
+        )}
+      </Box>
     </Modal>
   );
 }

@@ -135,6 +135,7 @@ function Profile() {
       let updatedFormData = { ...formData };
 
       if (imagePreview) {
+        await removeImageFirebase(formData.profilePicture);
         const imageUrl = await handleFileUpload(image);
         updatedFormData = { ...updatedFormData, profilePicture: imageUrl };
         console.log(imageUrl, "imageUrl");
