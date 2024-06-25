@@ -35,11 +35,20 @@ export const postCategorys = async (req, res, next) => {
       errorHandler(400, "Por favor preencha todos os campos obrigatórios!")
     );
   }
+  const { categoryItems } = req.body;
   const newCategorys = new Category({
     ...req.body,
     userId: req.user.id,
   });
   try {
+      const names = categoryItems.map(item => item.name);
+    const duplicatesInRequest = names.filter((item, index) => names.indexOf(item) !== index);
+
+    if (duplicatesInRequest.length > 0) {
+    return next(
+        errorHandler(400, `Itens duplicados não são permitidos!`)
+      );
+    }
     const saveNewCategorys = await newCategorys.save();
     res.status(201).json(saveNewCategorys);
   } catch (error) {
@@ -129,7 +138,7 @@ export const updateWorkoutsCategorys = async (req, res, next) => {
 
     if (duplicatesInRequest.length > 0) {
       return next(
-        errorHandler(400, `Itens duplicados na requisição: ${duplicatesInRequest.join(', ')}`)
+        errorHandler(400, `Itens duplicados não são permitidos!`)
       );
     }
 
@@ -138,7 +147,7 @@ export const updateWorkoutsCategorys = async (req, res, next) => {
     // Se o item não for encontrado, retorna uma resposta 404
     if (!item) {
       return next(
-        errorHandler(404, "Item não encontrado!")
+        errorHandler(404, "Item ou itens não encontrados!")
       );
     }
 
@@ -150,7 +159,7 @@ export const updateWorkoutsCategorys = async (req, res, next) => {
 
     if (duplicatesWithExisting.length > 0) {
       return next(
-        errorHandler(400, `Itens duplicados com os existentes: ${duplicatesWithExisting.join(', ')}`)
+        errorHandler(400, `Itens duplicados não são permitidos!`)
       );
     }
 

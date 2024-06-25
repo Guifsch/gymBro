@@ -80,7 +80,7 @@ export default function Workouts() {
   const columns = useMemo(
     () => [
       {
-        accessorKey: "name", //access nested data with dot notation
+        accessorKey: "name",
         header: "Nome",
         size: 150,
       },
@@ -100,9 +100,19 @@ export default function Workouts() {
         size: 150,
       },
       {
-        accessorKey: "category[0].name",
+        accessorKey: "category",
         header: "Categoria",
         size: 150,
+        Cell: ({ row }) => {
+          // Função de renderização personalizada para a célula
+          const categories = row.original.category; // Acessa a propriedade 'category' do objeto original da linha
+          if (Array.isArray(categories)) {
+            // Verifica se 'category' é um array
+            const categoryNames = categories.map((cat) => cat.name).join(", "); // Mapeia os objetos do array para obter os nomes e junta em uma string separada por vírgulas
+            return <span>{categoryNames}</span>; // Retorna os nomes das categorias como conteúdo da célula
+          }
+          return null; // Retorna null se 'category' não for um array, ou você pode colocar um valor padrão aqui
+        },
       },
 
       {
@@ -214,7 +224,7 @@ export default function Workouts() {
   };
 
   const handleCloseWorkoutModal = (e) => {
-    setCategoryInputClean(prevCount => prevCount + 1)
+    setCategoryInputClean((prevCount) => prevCount + 1);
     setModalContentUpdate({
       name: "",
       rep: "",
@@ -237,6 +247,7 @@ export default function Workouts() {
   };
 
   const handleOpenUpdate = (e) => {
+    console.log(e, "HEHE");
     setModalContentUpdate(e);
     setOpenWorkoutModal(true);
   };
@@ -251,11 +262,7 @@ export default function Workouts() {
             <Tab label="Registrar Treinos" value="2" />
           </TabList>
         </Box>
-        <TabPanel
-          value="1"
-          className="flex flex-col justify-initial items-center"
-          sx={{ width: "100%" }}
-        >
+        <TabPanel value="1">
           <Container
             sx={{
               display: "flex",
@@ -293,11 +300,7 @@ export default function Workouts() {
             <MaterialReactTable table={table} />
           </Box>
         </TabPanel>
-        <TabPanel
-          className="flex flex-col justify-initial items-center"
-          sx={{ width: "100%" }}
-          value="2"
-        >
+        <TabPanel value="2">
           <WorkoutSerie />
         </TabPanel>
       </TabContext>

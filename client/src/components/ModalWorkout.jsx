@@ -82,8 +82,8 @@ export default function ModalWorkout({
   const { currentUser } = useSelector((state) => state.user);
   useEffect(() => {
     try {
-      console.log(modalContentUpdate, "modalContentUpdate")
-      setSelectedOption(modalContentUpdate.category)
+      console.log(modalContentUpdate.category[0]._id, "modalContentUpdate")
+      setSelectedOption(modalContentUpdate.category[0]._id)
       setContent(modalContentUpdate);
     } catch {}
   }, [modalContentUpdate]);
@@ -238,7 +238,7 @@ export default function ModalWorkout({
       console.log(response, "response");
       dispatch(snackBarMessageSuccess("Treino salvo"));
     } catch (e) {
-      dispatch(snackBarMessageError("Arquivo inválido!"));
+      dispatch(snackBarMessageError(e.response.data.error));
 
       console.log(e, "erro");
     }
@@ -249,9 +249,9 @@ export default function ModalWorkout({
       set: "",
       weight: "",
       exercisePicture: "",
-      category: "",
       comment: "",
     });
+    setSelectedOption(null)
     setImagePreview(undefined);
     getWorkoutRefValue(prevCount => prevCount + 1);
   };
@@ -325,7 +325,8 @@ export default function ModalWorkout({
         >
           <CloseIcon fontSize="inherit" />
         </IconButton>
-        <Typography
+
+        {modalImageShow ? false :     <Typography
           textAlign="center"
           sx={{
             position: "absolute",
@@ -337,7 +338,8 @@ export default function ModalWorkout({
           }}
         >
           campos com * são obrigatórios...
-        </Typography>
+        </Typography>}
+    
         {loading ? (
           <Box
             sx={{
@@ -381,8 +383,8 @@ export default function ModalWorkout({
               component="img"
               sx={{
                 objectFit: "contain",
-                maxHeight: "400px",
-                maxWidth: "450px",
+                maxHeight: "700px",
+                maxWidth: "700px",
                 height: "100%",
                 width: "100%",
               }}
@@ -489,9 +491,9 @@ export default function ModalWorkout({
                   marginRight: "5%",
                   marginTop: "3%",
                 }}>
-              <FormControl sx={{ m: 1, minWidth: 80, width: '100%' }}>
+              <FormControl sx={{minWidth: 80, width: '100%' }}>
                 <InputLabel id="demo-simple-select-autowidth-label">
-                  Categoria
+                  Categoria*
                 </InputLabel>
 
                 <Select
@@ -591,7 +593,7 @@ export default function ModalWorkout({
                   }}
                   variant="h5"
                 >
-                  Selecione sua imagem
+                  Selecione sua imagem*
                 </Typography>
               )}
             </Container>

@@ -49,7 +49,7 @@ const style = {
   border: "2px solid #000",
   boxShadow: 24,
   overflow: "scroll",
-};
+};  
 
 export default function ModalWorkoutCategory({ open, handleClose, modalWorkoutCategoryRefreshRef }) {
   const axiosInterceptor = axiosConfig();
@@ -107,7 +107,7 @@ export default function ModalWorkoutCategory({ open, handleClose, modalWorkoutCa
       console.log(response, "response");
       dispatch(snackBarMessageSuccess("Categorias salvas"));
     } catch (e) {
-      dispatch(snackBarMessageError("Arquivo inválido!"));
+      dispatch(snackBarMessageError(e.response.data.error));
 
       console.log(e, "erro");
     }
@@ -115,6 +115,7 @@ export default function ModalWorkoutCategory({ open, handleClose, modalWorkoutCa
     getWorkoutCategorys();
     setFields([]);
     setInputValues([""]);
+    refreshModalRef("refresh");
   };
 
   const udpateCategory = async (e) => {
@@ -132,7 +133,7 @@ export default function ModalWorkoutCategory({ open, handleClose, modalWorkoutCa
       console.log(response, "response");
       dispatch(snackBarMessageSuccess("Categorias salvas"));
     } catch (e) {
-      dispatch(snackBarMessageError("Arquivo inválido!"));
+      dispatch(snackBarMessageError(e.response.data.error));
 
       console.log(e, "erro");
     }
@@ -288,9 +289,12 @@ export default function ModalWorkoutCategory({ open, handleClose, modalWorkoutCa
                   alignItems: "center",
                   justifyContent: "center",
                   border: "1px solid",
+                  
                 }}
               >
+                
                 {fields.map((item, index) => (
+               
                   <TextField
                     key={index}
                     onChange={(e) => handleChange(e, index)}
@@ -311,9 +315,11 @@ export default function ModalWorkoutCategory({ open, handleClose, modalWorkoutCa
 
                 {fields.length > 0 ? (
                   <Button onClick={categoryRemove}>X</Button>
+                  
                 ) : (
                   false
                 )}
+             
               </Box>
               <Box
                 sx={{

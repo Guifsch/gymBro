@@ -149,7 +149,7 @@ export default function Workouts() {
   };
 
   return (
-    <Box className="flex flex-col justify-initial items-center pageMarginTopNavFix">
+    <Box className="flex flex-col justify-initial items-center">
       <Loading />
           <Button
             variant="contained"
