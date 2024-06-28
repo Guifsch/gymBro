@@ -12,7 +12,7 @@ import { TextField } from "@mui/material";
 import Backdrop from "@mui/material/Backdrop";
 import InputLabel from "@mui/material/InputLabel";
 import MenuItem from "@mui/material/MenuItem";
-import ModalWorkoutSerie from "./ModalWorkoutSerie";
+import ModalWorkoutSet from "./ModalWorkoutSet";
 import { useTheme } from '@mui/material/styles';
 import {
 
@@ -241,7 +241,7 @@ export default function Workouts() {
               </Typography>
             </Button>
             </Container>
-            <ModalWorkoutSerie
+            <ModalWorkoutSet
         openSerieModal={openSerieModal}
         handleCloseSerieModal={handleCloseSerieModal}
       />

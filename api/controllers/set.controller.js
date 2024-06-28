@@ -5,12 +5,12 @@ import Set from "../models/set.model.js";
 import { errorHandler } from "../utils/error.js";
 
 export const postSet = async (req, res, next) => {
-  const { name, comment, selectedItemsIds } = req.body;
+  const { name, comment, selectedItems } = req.body;
 
   try {
-    const workouts = await Workout.find({ '_id': { $in: selectedItemsIds } });
+    const workouts = await Workout.find({ '_id': { $in: selectedItems } });
 
-    if (workouts.length !== selectedItemsIds.length) {
+    if (workouts.length !== selectedItems.length) {
      
       return  next(errorHandler(400, "Um ou mais IDs de exercícios são inválidos!"));
     }
@@ -18,7 +18,7 @@ export const postSet = async (req, res, next) => {
     const newSet = new Set({
       name,
       comment,
-      selectedItems: selectedItemsIds
+      selectedItems: selectedItems
     });
 
     await newSet.save();
