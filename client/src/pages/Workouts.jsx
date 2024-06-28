@@ -6,7 +6,7 @@ import {
 import ModalWorkout from "../components/ModalWorkout";
 import Tab from "@mui/material/Tab";
 import { TabContext, TabPanel, TabList } from "@mui/lab";
-import WorkoutSerie from "../components/WorkoutSerie";
+import WorkoutSet from "../components/WorkoutSet";
 import Button from "@mui/material/Button";
 import React, { useCallback, useState, useEffect } from "react";
 import axiosConfig from "../utils/axios";
@@ -36,9 +36,8 @@ export default function Workouts() {
   const [modalContentUpdate, setModalContentUpdate] = useState({
     name: "",
     rep: "",
-    set: "",
+    serie: "",
     weight: "",
-    category: "",
     exercisePicture: "",
     comment: "",
   });
@@ -61,12 +60,14 @@ export default function Workouts() {
     }
   }, []);
 
+  //Refresh na lista do workout quando o modal é atualizado e na lista de category quando são adicionados novos
+
   const getWorkoutRef = useCallback(async (e) => {
     setGetWorkoutRefUpdate(e);
     console.log("pagina atualizada", e);
   }, []);
 
-  const refreshModalRef = useCallback(async (e) => {
+  const refreshModalRefCategory = useCallback(async (e) => {
     setModalWorkoutCategoryRefreshRef(e);
 
     console.log("TESTEEEE", e);
@@ -77,6 +78,7 @@ export default function Workouts() {
     getWorkout();
   }, [getWorkout, getWorkoutRefUpdate]);
 
+  //--------------------------------------
   const columns = useMemo(
     () => [
       {
@@ -90,8 +92,8 @@ export default function Workouts() {
         size: 150,
       },
       {
-        accessorKey: "set",
-        header: "Sets",
+        accessorKey: "serie",
+        header: "Series",
         size: 150,
       },
       {
@@ -214,8 +216,9 @@ export default function Workouts() {
     }
   };
 
-  const handleShowImage = (e) => {
-    setImageTableShow(e);
+  const handleOpenUpdate = (e) => {
+    console.log(e, "HEHE");
+    setModalContentUpdate(e);
     setOpenWorkoutModal(true);
   };
 
@@ -224,19 +227,33 @@ export default function Workouts() {
   };
 
   const handleCloseWorkoutModal = (e) => {
-    setCategoryInputClean((prevCount) => prevCount + 1);
-    setModalContentUpdate({
-      name: "",
-      rep: "",
-      set: "",
-      weight: "",
-      category: "",
-      comment: "",
-      exercisePicture: "",
-    });
-    setOpenWorkoutModal(false);
+    try {
+      setOpenWorkoutModal(false);
+      setCategoryInputClean((prevCount) => prevCount + 1);
+      setModalContentUpdate({
+        name: "",
+        rep: "",
+        serie: "",
+        weight: "",
+        comment: "",
+        exercisePicture: "",
+      });
+      
+    console.log(modalContentUpdate, "pinto")
+    } catch (e) {
+      console.log(e);
+    }
+;
+
     setImageTableShow(undefined);
   };
+
+  const handleShowImage = (e) => {
+    setImageTableShow(e);
+    setOpenWorkoutModal(true);
+  };
+
+  //Category modal
 
   const handleOpenCategoryModal = (e) => {
     setOpenCategoryModal(true);
@@ -244,12 +261,6 @@ export default function Workouts() {
 
   const handleCloseCategoryModal = () => {
     setOpenCategoryModal(false);
-  };
-
-  const handleOpenUpdate = (e) => {
-    console.log(e, "HEHE");
-    setModalContentUpdate(e);
-    setOpenWorkoutModal(true);
   };
 
   return (
@@ -301,14 +312,14 @@ export default function Workouts() {
           </Box>
         </TabPanel>
         <TabPanel value="2">
-          <WorkoutSerie />
+          <WorkoutSet />
         </TabPanel>
       </TabContext>
       <ModalWorkoutCategory
         open={openCategoryModal}
         handleClose={handleCloseCategoryModal}
         getWorkoutRef={getWorkoutRef}
-        modalWorkoutCategoryRefreshRef={refreshModalRef}
+        modalWorkoutCategoryRefreshRef={refreshModalRefCategory}
       />
       <ModalWorkout
         open={openWorkoutModal}
@@ -316,7 +327,7 @@ export default function Workouts() {
         getWorkoutRef={getWorkoutRef}
         modalContentUpdate={modalContentUpdate}
         modalImageShow={imageTableShow}
-        refreshModalRef={modalWorkoutCategoryRefreshRef}
+        refreshModalRefCategory={modalWorkoutCategoryRefreshRef}
         categoryInputClean={categoryInputClean}
       />
     </Box>

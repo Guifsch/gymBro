@@ -24,7 +24,7 @@ const workoutSchema = new mongoose.Schema({
     type: String,
     required: true,
   },
-  set: {
+  serie: {
     type: String,
     required: true,
   },

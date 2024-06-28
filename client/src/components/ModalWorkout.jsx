@@ -42,6 +42,18 @@ import {
 } from "firebase/storage";
 import axiosConfig from "../utils/axios";
 
+
+const ITEM_HEIGHT = 48;
+const ITEM_PADDING_TOP = 8;
+const MenuProps = {
+  PaperProps: {
+    style: {
+      maxHeight: ITEM_HEIGHT * 4.5 + ITEM_PADDING_TOP,
+      width: 246.47,
+    },
+  },
+};
+
 const style = {
   position: "absolute",
   top: "50%",
@@ -60,8 +72,8 @@ export default function ModalWorkout({
   getWorkoutRef,
   modalContentUpdate,
   modalImageShow,
-  refreshModalRef,
-  categoryInputClean
+  refreshModalRefCategory,
+  categoryInputClean,
 }) {
   const axiosInterceptor = axiosConfig();
   // const [openModal, setOpenModal] = React.useState(false);
@@ -69,7 +81,7 @@ export default function ModalWorkout({
   const [content, setContent] = useState({
     name: "",
     rep: "",
-    set: "",
+    serie: "",
     weight: "",
     exercisePicture: "",
     comment: "",
@@ -82,27 +94,29 @@ export default function ModalWorkout({
   const { currentUser } = useSelector((state) => state.user);
   useEffect(() => {
     try {
-      console.log(modalContentUpdate.category[0]._id, "modalContentUpdate")
-      setSelectedOption(modalContentUpdate.category[0]._id)
-      setContent(modalContentUpdate);
-    } catch {}
+      if (modalContentUpdate.category && modalContentUpdate.category.length > 0)
+        setSelectedOption(modalContentUpdate.category[0]._id);
+    } catch (e) {
+      console.log(e);
+    }
+    setContent(modalContentUpdate);
   }, [modalContentUpdate]);
 
   useEffect(() => {
- 
-    setSelectedOption(null)
-
-    console.log(categoryInputClean, "categoryInputClean")
+    try {
+      setSelectedOption(null);
+    } catch (e) {
+      console.log(e);
+    }
+    console.log(categoryInputClean, "categoryInputClean");
   }, [categoryInputClean]);
 
- 
-
   useEffect(() => {
-   getWorkoutCategorys()
-  }, [refreshModalRef]);
+    getWorkoutCategorys();
+  }, [refreshModalRefCategory]);
   const getWorkoutCategorys = useCallback(async () => {
     try {
-      const response = await axiosInterceptor.get(`/api/workout/categorys`, {
+      const response = await axiosInterceptor.get(`/api/category/categorys`, {
         withCredentials: true,
       });
       console.log(response.data[0].categoryItems, "workoutsCategorys");
@@ -134,31 +148,33 @@ export default function ModalWorkout({
     // Verificar se selectedId não é uma string vazia
     if (selectedId !== "") {
       // Encontrar o objeto correspondente ao selectedId no array de workoutsCategorys
-      const selectedOptionObject = workoutsCategorys.find(option => option._id === selectedId);
-      console.log(selectedOptionObject, "selectedOptionObject")
+      const selectedOptionObject = workoutsCategorys.find(
+        (option) => option._id === selectedId
+      );
+      console.log(selectedOptionObject, "selectedOptionObject");
 
       // Verificar se selectedOptionObject foi encontrado
       if (selectedOptionObject) {
         // Atualizar o conteúdo com a nova selectedOption e category
-        setContent(prevContent => ({
+        setContent((prevContent) => ({
           ...prevContent,
           selectedOption: selectedOptionObject,
-          category: selectedOptionObject
+          category: selectedOptionObject,
         }));
       } else {
         // Caso selectedOptionObject não seja encontrado, limpar o conteúdo relacionado à opção selecionada
-        setContent(prevContent => ({
+        setContent((prevContent) => ({
           ...prevContent,
           selectedOption: null, // Limpa selectedOption
-          category: '' // Limpa category
+          category: "", // Limpa category
         }));
       }
     } else {
       // Caso selecionado "Nenhum", limpar o conteúdo relacionado à opção selecionada
-      setContent(prevContent => ({
+      setContent((prevContent) => ({
         ...prevContent,
         selectedOption: null, // Limpa selectedOption
-        category: '' // Limpa category
+        category: "", // Limpa category
       }));
     }
   };
@@ -246,14 +262,14 @@ export default function ModalWorkout({
     setContent({
       name: "",
       rep: "",
-      set: "",
+      serie: "",
       weight: "",
       exercisePicture: "",
       comment: "",
     });
-    setSelectedOption(null)
+    setSelectedOption(null);
     setImagePreview(undefined);
-    getWorkoutRefValue(prevCount => prevCount + 1);
+    getWorkoutRefValue((prevCount) => prevCount + 1);
   };
 
   const submitWorkoutUpdate = async () => {
@@ -277,9 +293,9 @@ export default function ModalWorkout({
       dispatch(snackBarMessageSuccess("Atualização completa"));
       setContent(response.data);
     } catch (e) {
-      dispatch(snackBarMessageError("Arquivo inválido!"));
+      dispatch(snackBarMessageError(e.response.data.error));
     }
-    getWorkoutRefValue(prevCount => prevCount + 1);
+    getWorkoutRefValue((prevCount) => prevCount + 1);
     setLoading(false);
     setImagePreview(undefined);
   };
@@ -299,7 +315,7 @@ export default function ModalWorkout({
       aria-labelledby="transition-modal-title"
       aria-describedby="transition-modal-description"
       open={open}
-      onClose={() => handleClose("teste")}
+      onClose={handleClose}
       closeAfterTransition
       slots={{ backdrop: Backdrop }}
       slotProps={{
@@ -311,8 +327,7 @@ export default function ModalWorkout({
     >
       <Box sx={style}>
         <IconButton
-
-          onClick={() => handleClose("teste")}
+          onClick={handleClose}
           size="large"
           sx={{
             position: "absolute",
@@ -326,20 +341,24 @@ export default function ModalWorkout({
           <CloseIcon fontSize="inherit" />
         </IconButton>
 
-        {modalImageShow ? false :     <Typography
-          textAlign="center"
-          sx={{
-            position: "absolute",
-            right: "40%",
-            left: "40%",
-            top: "5px",
-            fontSize: "0.8em",
-            color: "red",
-          }}
-        >
-          campos com * são obrigatórios...
-        </Typography>}
-    
+        {modalImageShow ? (
+          false
+        ) : (
+          <Typography
+            textAlign="center"
+            sx={{
+              position: "absolute",
+              right: "40%",
+              left: "40%",
+              top: "5px",
+              fontSize: "0.8em",
+              color: "red",
+            }}
+          >
+            campos com * são obrigatórios...
+          </Typography>
+        )}
+
         {loading ? (
           <Box
             sx={{
@@ -444,11 +463,11 @@ export default function ModalWorkout({
               />
               <TextField
                 onChange={handleChange}
-                type="set"
+                type="serie"
                 required
-                id="set"
-                value={content.set}
-                label="Sets"
+                id="serie"
+                value={content.serie}
+                label="Series"
                 variant="standard"
                 autoComplete="on"
                 sx={{
@@ -471,49 +490,40 @@ export default function ModalWorkout({
                   marginTop: "3%",
                 }}
               />
-              {/* <TextField
-                onChange={handleChange}
-                type="category"
-                required
-                id="category"
-                label="Categoria"
-                value={content.category}
-                variant="standard"
-                autoComplete="on"
+              <Box
                 sx={{
                   width: "26%",
                   marginRight: "5%",
                   marginTop: "3%",
                 }}
-              /> */}
-              <Box   sx={{
-                  width: "26%",
-                  marginRight: "5%",
-                  marginTop: "3%",
-                }}>
-              <FormControl sx={{minWidth: 80, width: '100%' }}>
-                <InputLabel id="demo-simple-select-autowidth-label">
-                  Categoria*
-                </InputLabel>
+              >
+                <Box sx={{ minWidth: 80, width: "100%" }}>
+                  <InputLabel sx={{fontSize: '1rem'}} id="demo-simple-select-autowidth-label">
+                    Categoria*
+                  </InputLabel>
 
-                <Select
-                  labelId="demo-simple-select-autowidth-label"
-                  id="demo-simple-select-autowidth"
-                  value={selectedOption || ""}
-                  onChange={handleChangeCategory}
-                  autoWidth
-                  label="Selecione uma opção"
-                >
-                  <MenuItem value="">
-                    <em>Nenhum</em>
-                  </MenuItem>
-                  {workoutsCategorys.map((option) => (
-                    <MenuItem key={option._id} value={option._id}>
-                      {option.name}
+                  <Select
+                  sx={{width: '100%'}}
+                    labelId="demo-simple-select-autowidth-label"
+                    id="demo-simple-select-autowidth"
+                    value={selectedOption || ""}
+                    onChange={handleChangeCategory}
+                    variant="filled"
+                    autoWidth
+                    label="Selecione uma opção"
+                    MenuProps={MenuProps}
+                  >
+                    <MenuItem value=""
+                    >
+                      <em>Nenhum</em>
                     </MenuItem>
-                  ))}
-                </Select>
-              </FormControl>
+                    {workoutsCategorys.map((option) => (
+                      <MenuItem key={option._id} value={option._id}>
+                        {option.name}
+                      </MenuItem>
+                    ))}
+                  </Select>
+                </Box>
               </Box>
               <TextField
                 id="comment"

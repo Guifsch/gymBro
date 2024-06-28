@@ -66,7 +66,7 @@ export default function ModalWorkoutCategory({ open, handleClose, modalWorkoutCa
 
   const getWorkoutCategorys = useCallback(async () => {
     try {
-      const response = await axiosInterceptor.get(`/api/workout/categorys`, {
+      const response = await axiosInterceptor.get(`/api/category/categorys`, {
         withCredentials: true,
       });
 
@@ -99,7 +99,7 @@ export default function ModalWorkoutCategory({ open, handleClose, modalWorkoutCa
 
     try {
       const response = await axiosInterceptor.post(
-        `/api/workout/categorys`,
+        `/api/category/categorys`,
         request,
         { withCredentials: true }
       );
@@ -125,7 +125,7 @@ export default function ModalWorkoutCategory({ open, handleClose, modalWorkoutCa
     const request = { categoryItems: fields };
     try {
       const response = await axiosInterceptor.put(
-        `/api/workout/updateCategory/${categoryItemsId}`,
+        `/api/category/update/${categoryItemsId}`,
         request,
         { withCredentials: true }
       );
@@ -154,7 +154,7 @@ export default function ModalWorkoutCategory({ open, handleClose, modalWorkoutCa
     console.log(e, "panicat");
     try {
       const response = await axiosInterceptor.delete(
-        `/api/workout/categorys/${categoryItemsId}/categoryItems/${e}`,
+        `/api/category/categorys/${categoryItemsId}/categoryItems/${e}`,
         { withCredentials: true }
       );
       console.log(response, "resposta");
