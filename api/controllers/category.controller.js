@@ -24,6 +24,11 @@ export const postCategorys = async (req, res, next) => {
     const saveNewCategorys = await newCategorys.save();
     res.status(201).json(saveNewCategorys);
   } catch (error) {
+    if (error._message.includes("Category validation failed")){
+      return next(
+        errorHandler(400, "Por favor preencha todos os campos!")
+      );
+    }
     next(error);
   }
 };
@@ -44,11 +49,21 @@ export const updateCategorys = async (req, res, next) => {
   const { id } = req.params;
   const { categoryItems } = req.body;
 
+  if(req.body.categoryItems.length === 0) {
+
+    return next(
+      errorHandler(400, `Nada foi modificado!`)
+    );
+  }
+
   try {
     // Verificar se há duplicatas em categoryItems do corpo da requisição
     const names = categoryItems.map(item => item.name);
     const duplicatesInRequest = names.filter((item, index) => names.indexOf(item) !== index);
 
+
+    
+    
     if (duplicatesInRequest.length > 0) {
       return next(
         errorHandler(400, `Itens duplicados não são permitidos!`)
@@ -57,7 +72,6 @@ export const updateCategorys = async (req, res, next) => {
 
     const item = await Category.findById(id);
 
-    // Se o item não for encontrado, retorna uma resposta 404
     if (!item) {
       return next(
         errorHandler(404, "Item ou itens não encontrados!")
@@ -100,7 +114,12 @@ export const updateCategorys = async (req, res, next) => {
     await item.save();
     res.status(200).send(item);
   } catch (error) {
-    res.status(400).send(error);
+    if (error._message.includes("Category validation failed")){
+      return next(
+        errorHandler(400, "Por favor preencha todos os campos!")
+      );
+    }
+    next(error)
   }
 }
 

@@ -87,8 +87,8 @@ export default function ModalWorkoutCategory({ open, handleClose, modalWorkoutCa
     getWorkoutCategorys();
   }, [getWorkoutCategorys]);
 
-  const refreshModalRef = (e) => {
-    modalWorkoutCategoryRefreshRef(e);
+  const refreshModalRef = () => {
+    modalWorkoutCategoryRefreshRef();
   };
 
   
@@ -115,7 +115,7 @@ export default function ModalWorkoutCategory({ open, handleClose, modalWorkoutCa
     getWorkoutCategorys();
     setFields([]);
     setInputValues([""]);
-    refreshModalRef("refresh");
+    refreshModalRef();
   };
 
   const udpateCategory = async (e) => {
@@ -141,7 +141,7 @@ export default function ModalWorkoutCategory({ open, handleClose, modalWorkoutCa
     getWorkoutCategorys();
     setFields([]);
     setInputValues([""]);
-    refreshModalRef("refresh");
+    refreshModalRef();
   };
 
 
@@ -166,7 +166,7 @@ export default function ModalWorkoutCategory({ open, handleClose, modalWorkoutCa
     getWorkoutCategorys();
     setFields([]);
     setInputValues([""]);
-    // getWorkout();
+    refreshModalRef();
   };
 
   const handleChange = (e, index) => {

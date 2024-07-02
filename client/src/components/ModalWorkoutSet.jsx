@@ -16,7 +16,13 @@ import {
 import CloseIcon from "@mui/icons-material/Close";
 import { useTheme } from "@mui/material/styles";
 import Button from "@mui/material/Button";
+import {
+  snackBarMessageSuccess,
+  snackBarMessageError,
+} from "../redux/snackbar/snackBarSlice";
+import { Container } from "@mui/material";
 import axiosConfig from "../utils/axios";
+import { useSelector, useDispatch } from "react-redux";
 
 // Estilo do modal
 const style = {
@@ -25,7 +31,7 @@ const style = {
   left: "50%",
   transform: "translate(-50%, -50%)",
   width: 600,
-  height: 700,
+  height: 500,
   bgcolor: "background.paper",
   border: "2px solid #000",
   boxShadow: 24,
@@ -48,17 +54,42 @@ function getStyles(name, selectedItems, theme) {
 export default function ModalWorkoutSerie({
   openSerieModal,
   handleCloseSerieModal,
+  modalContentUpdate,
 }) {
   const theme = useTheme(); // Hook do tema do Material-UI para usar estilos do tema
   const [selectedItems, setSelectedItems] = useState([]); // Estado para armazenar os itens selecionados
+  const [test, setTest] = useState([]); // Estado para armazenar os itens selecionados
   const [groupedWorkouts, setGroupedWorkouts] = useState({}); // Estado para armazenar os exercícios agrupados por categoria
   const [formValues, setFormValues] = useState({
-    nome: "",
-    comentario: "",
+    name: "",
+    comment: "",
     selectedItems: [],
   });
-
+  const dispatch = useDispatch();
   const axiosInterceptor = axiosConfig(); // Configuração do axios para fazer requisições
+
+  useEffect(() => {
+    try {
+      if (
+        modalContentUpdate.selectedItems &&
+        modalContentUpdate.selectedItems.length > 0
+      ) {
+        setSelectedItems(
+          modalContentUpdate.selectedItems.map((e) => {
+            console.log(e, "picles");
+            return e._id;
+          })
+        );
+      }
+      console.log(test, "TEST");
+
+      // setSelectedItems(modalContentUpdate.selectedItems._id);
+    } catch (e) {
+      console.log(e);
+    }
+    console.log(modalContentUpdate, "modalContentUpdatemodalContentUpdate");
+    setFormValues(modalContentUpdate);
+  }, [modalContentUpdate]);
 
   // Função para buscar os exercícios da API e agrupar por categoria
   const getWorkout = useCallback(async () => {
@@ -67,7 +98,7 @@ export default function ModalWorkoutSerie({
         withCredentials: true,
       });
       const workouts = response.data.workouts;
-
+      console.log(workouts, "workouts");
       // Agrupando os exercícios por categoria
       const groupedByCategory = workouts.reduce((acc, workout) => {
         const categoryName = workout.category[0].name;
@@ -85,8 +116,6 @@ export default function ModalWorkoutSerie({
     }
   }, []);
 
-  
-  // useEffect para buscar os exercícios quando o componente é montado
   useEffect(() => {
     getWorkout();
   }, [getWorkout]);
@@ -125,24 +154,22 @@ export default function ModalWorkoutSerie({
 
   useEffect(() => {
     console.log(selectedItems, "selectedItems");
-    setFormValues(prevValues => ({
+    setFormValues((prevValues) => ({
       ...prevValues,
-      selectedItems: selectedItems
+      selectedItems: selectedItems,
     }));
   }, [selectedItems]);
 
-
-
   const handleChange = (e) => {
     const { id, value } = e.target;
-    setFormValues(prevValues => ({
+    setFormValues((prevValues) => ({
       ...prevValues,
-      [id]: value
+      [id]: value,
     }));
   };
 
-  const submitSet= async (e) => {
-    console.log(formValues, "selectedItems")
+  const submitSet = async (e) => {
+    console.log(formValues, "selectedItems");
 
     try {
       const response = await axiosInterceptor.post(
@@ -152,14 +179,29 @@ export default function ModalWorkoutSerie({
       );
 
       console.log(response, "response");
-      // dispatch(snackBarMessageSuccess("Categorias salvas"));
+      dispatch(snackBarMessageSuccess(response.data.message));
     } catch (e) {
-      // dispatch(snackBarMessageError(e.response.data.error));
+      dispatch(snackBarMessageError(e.response.data.error));
 
       console.log(e, "erro");
     }
-
   };
+
+  const submitSetUpdate = async () => {
+    try {
+      const response = await axiosInterceptor.post(
+        `/api/set/update/${formValues._id}`,
+        formValues,
+        { withCredentials: true }
+      );
+      console.log(response, "updateworkoutresponse");
+      dispatch(snackBarMessageSuccess("Atualização completa"));
+    } catch (e) {
+      console.log(e, "ERRRO")
+      // dispatch(snackBarMessageError(e.response.data.error));
+    }
+  };
+
 
   return (
     <Modal
@@ -190,85 +232,118 @@ export default function ModalWorkoutSerie({
             alignItems: "center",
           }}
         >
-          <TextField
-            onChange={handleChange}
-            required
-            id="name"
-            label="Nome"
-            variant="standard"
-            autoComplete="on"
+          <Container
             sx={{
-              width: "26%",
-              marginRight: "5%",
+              display: "flex",
+              flexDirection: "column",
+              alignItems: "center",
+              paddingTop: "50px",
             }}
-          />
-          <TextField
-            onChange={handleChange}
-            required
-            id="comment"
-            label="Comentário"
-            variant="standard"
-            autoComplete="on"
-            sx={{
-              width: "26%",
-              marginRight: "5%",
-              marginTop: "3%",
-            }}
-          />
-          <Box sx={{ width: "250px", marginTop: "3%" }}>
-            <FormControl sx={{ m: 1, width: 300 }}>
-              <InputLabel id="select-label">Workouts</InputLabel>
-              <Select
-                labelId="select-label"
-                multiple
-                value={selectedItems}
-                renderValue={(selected) => (
-                  <Box sx={{ display: "flex", flexWrap: "wrap", gap: 0.5 }}>
-                    {selected.map((id) => (
-                      <Chip key={id} label={getWorkoutNameById(id)} />
-                    ))}
-                  </Box>
-                )}
-              >
-                <MenuItem
-                  value=""
-                  onClick={() => setSelectedItems([])} // Limpa todos os itens selecionados
+          >
+            <TextField
+              onChange={handleChange}
+              required
+              id="name"
+              value={formValues.name}
+              label="Nome"
+              variant="standard"
+              autoComplete="on"
+              sx={{
+                width: "30%",
+                marginRight: "5%",
+              }}
+            />
+            <TextField
+              id="comment"
+              label="Comentário"
+              multiline
+              type="comment"
+              value={formValues.comment}
+              onChange={handleChange}
+              maxRows={4}
+              sx={{
+                "& > div": { height: "100px" },
+                width: "50%",
+                marginTop: "3%",
+              }}
+            />
+            <Box sx={{ marginTop: "3%" }}>
+              <FormControl sx={{ m: 1, width: 300 }} variant="filled">
+                <InputLabel id="select-label">Treinos*</InputLabel>
+                <Select
+                  labelId="select-label"
+                  multiple
+                  value={selectedItems}
+                  renderValue={(selected) => (
+                    <Box sx={{ display: "flex", flexWrap: "wrap", gap: 0.5 }}>
+                      {selected.map((id) => (
+                        <Chip key={id} label={getWorkoutNameById(id)} />
+                      ))}
+                    </Box>
+                  )}
                 >
-                  <ListItemText primary="Nenhum" />
-                </MenuItem>
-                {Object.keys(groupedWorkouts).map((category) => (
-                  <div key={category}>
-                    <ListSubheader>{category}</ListSubheader>
-                    {groupedWorkouts[category].map((workout) => (
-                      <MenuItem
-                        key={workout._id}
-                        value={workout._id}
-                        style={getStyles(workout._id, selectedItems, theme)}
-                        onClick={() => handleItemClick(workout._id)}
+                  <MenuItem
+                    value=""
+                    onClick={() => setSelectedItems([])} // Limpa todos os itens selecionados
+                  >
+                    <ListItemText primary="Nenhum" />
+                  </MenuItem>
+                  {Object.keys(groupedWorkouts).map((category) => (
+                    <div key={category}>
+                      <ListSubheader
+                        sx={{
+                          backgroundColor: "black",
+                          color: "white",
+                          fontWeight: "bold",
+                        }}
                       >
-                        <Checkbox
-                          checked={selectedItems.indexOf(workout._id) > -1}
-                          tabIndex={-1}
-                          disableRipple
-                        />
-                        <ListItemText primary={workout.name} />
-                      </MenuItem>
-                    ))}
-                  </div>
-                ))}
-              </Select>
-            </FormControl>
-          </Box>
-          <Button
-                sx={{
-                  mt: 5,
-                }}
-                variant="contained"
-                type="submit"
-                onClick={submitSet}
-              >
-                Salvar
-              </Button>
+                        {category}
+                      </ListSubheader>
+                      {groupedWorkouts[category].map((workout) => (
+                        <MenuItem
+                          key={workout._id}
+                          value={workout._id}
+                          style={getStyles(workout._id, selectedItems, theme)}
+                          onClick={() => handleItemClick(workout._id)}
+                        >
+                          <Checkbox
+                            checked={selectedItems.indexOf(workout._id) > -1}
+                            tabIndex={-1}
+                            disableRipple
+                          />
+                          <ListItemText primary={workout.name} />
+                        </MenuItem>
+                      ))}
+                    </div>
+                  ))}
+                </Select>
+              </FormControl>
+            </Box>
+          </Container>
+
+          {Object.values(modalContentUpdate).every((value) => value === "") ? (
+            <Button
+              sx={{
+                mt: 5,
+              }}
+              variant="contained"
+              type="submit"
+              onClick={submitSet}
+            >
+              Salvar
+            </Button>
+          ) : (
+            <Button
+              sx={{
+                mt: 5,
+              }}
+              variant="contained"
+              type="submit"
+              onClick={submitSetUpdate}
+            >
+              Atualizar
+            </Button>
+          )}
         </Box>
       </Box>
     </Modal>

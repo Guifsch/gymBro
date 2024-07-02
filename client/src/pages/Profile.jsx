@@ -54,7 +54,7 @@ function Profile() {
   const getUserProfile = useCallback(async () => {
     try {
       const response = await axiosInterceptor.get(
-        `/api/user/find/${currentUser._id}`,
+        `/api/user/user/${currentUser._id}`,
         { withCredentials: true }
       );
       setFormData(response.data);

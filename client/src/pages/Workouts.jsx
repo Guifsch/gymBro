@@ -28,7 +28,7 @@ export default function Workouts() {
   const dispatch = useDispatch();
   const [valueTab, setValueTab] = React.useState("1");
   const [modalWorkoutCategoryRefreshRef, setModalWorkoutCategoryRefreshRef] =
-    React.useState("1");
+    React.useState(1);
   const [openWorkoutModal, setOpenWorkoutModal] = React.useState(false);
   const [openCategoryModal, setOpenCategoryModal] = React.useState(false);
   const [categoryInputClean, setCategoryInputClean] = React.useState(1);
@@ -42,11 +42,13 @@ export default function Workouts() {
     comment: "",
   });
   const [workouts, setWorkouts] = useState([]);
-  const [getWorkoutRefUpdate, setGetWorkoutRefUpdate] = useState([]);
+  const [getWorkoutRefUpdate, setGetWorkoutRefUpdate] = useState(1);
 
   const handleChangeTab = (event, newValue) => {
     setValueTab(newValue);
   };
+
+
 
   const getWorkout = useCallback(async () => {
     try {
@@ -64,15 +66,14 @@ export default function Workouts() {
 
   const getWorkoutRef = useCallback(async (e) => {
     setGetWorkoutRefUpdate(e);
-    console.log("pagina atualizada", e);
   }, []);
 
   const refreshModalRefCategory = useCallback(async (e) => {
-    setModalWorkoutCategoryRefreshRef(e);
-
-    console.log("TESTEEEE", e);
+    setModalWorkoutCategoryRefreshRef((prevCount) => prevCount + 1);
   }, []);
 
+
+ 
   useEffect(() => {
     getWorkoutRef();
     getWorkout();
@@ -226,8 +227,7 @@ export default function Workouts() {
     setOpenWorkoutModal(true);
   };
 
-  const handleCloseWorkoutModal = (e) => {
-    try {
+  const handleCloseWorkoutModal = () => {
       setOpenWorkoutModal(false);
       setCategoryInputClean((prevCount) => prevCount + 1);
       setModalContentUpdate({
@@ -238,13 +238,6 @@ export default function Workouts() {
         comment: "",
         exercisePicture: "",
       });
-      
-    console.log(modalContentUpdate, "pinto")
-    } catch (e) {
-      console.log(e);
-    }
-;
-
     setImageTableShow(undefined);
   };
 

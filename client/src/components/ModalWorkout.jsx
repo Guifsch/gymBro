@@ -111,18 +111,18 @@ export default function ModalWorkout({
     console.log(categoryInputClean, "categoryInputClean");
   }, [categoryInputClean]);
 
-  useEffect(() => {
-    getWorkoutCategorys();
-  }, [refreshModalRefCategory]);
+
   const getWorkoutCategorys = useCallback(async () => {
     try {
       const response = await axiosInterceptor.get(`/api/category/categorys`, {
         withCredentials: true,
       });
-      console.log(response.data[0].categoryItems, "workoutsCategorys");
+ 
       if (response.data.length > 0) {
         setWorkoutsCategorys(response.data[0].categoryItems);
-      }
+      } else {
+        setWorkoutsCategorys([])
+      } 
     } catch (e) {
       console.log(e, "erro");
     }
@@ -130,10 +130,12 @@ export default function ModalWorkout({
 
   useEffect(() => {
     getWorkoutCategorys();
-  }, [getWorkoutCategorys]);
+    console.log(refreshModalRefCategory, "refresh CATEGORYYYY")
+    console.log(workoutsCategorys, "refresh workoutsCategorys")
+  }, [refreshModalRefCategory, getWorkoutCategorys]);
 
   const getWorkoutRefValue = (e) => {
-    getWorkoutRef(e);
+    getWorkoutRef((prevCount) => prevCount + 1);
   };
 
   const handleChange = (e) => {
@@ -269,7 +271,7 @@ export default function ModalWorkout({
     });
     setSelectedOption(null);
     setImagePreview(undefined);
-    getWorkoutRefValue((prevCount) => prevCount + 1);
+    getWorkoutRefValue();
   };
 
   const submitWorkoutUpdate = async () => {
@@ -295,7 +297,7 @@ export default function ModalWorkout({
     } catch (e) {
       dispatch(snackBarMessageError(e.response.data.error));
     }
-    getWorkoutRefValue((prevCount) => prevCount + 1);
+    getWorkoutRefValue();
     setLoading(false);
     setImagePreview(undefined);
   };
