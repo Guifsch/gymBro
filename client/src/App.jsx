@@ -8,11 +8,20 @@ import Menu from "./components/Menu";
 import PrivateRoute from "./components/PrivateRoute";
 import SnackBar from "./components/SnackBar";
 import { useSelector } from "react-redux";
+import { ThemeProvider, createTheme } from '@mui/material/styles';
+import CssBaseline from '@mui/material/CssBaseline';
 
+const theme = createTheme({
+  typography: {
+    fontFamily: 'Helvica, Arial, sans-serif',
+  },
+});
 
 function App() {
   const { currentUser } = useSelector((state) => state.user);
   return (
+    <ThemeProvider theme={theme}>
+         <CssBaseline />
     <BrowserRouter>
       <SnackBar />
       {currentUser ? <Menu /> : false}
@@ -28,6 +37,7 @@ function App() {
         </Route>
       </Routes>
     </BrowserRouter>
+    </ThemeProvider>
   );
 }
 

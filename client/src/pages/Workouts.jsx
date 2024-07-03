@@ -48,8 +48,6 @@ export default function Workouts() {
     setValueTab(newValue);
   };
 
-
-
   const getWorkout = useCallback(async () => {
     try {
       const response = await axiosInterceptor.get(`/api/workout/workouts`, {
@@ -72,8 +70,6 @@ export default function Workouts() {
     setModalWorkoutCategoryRefreshRef((prevCount) => prevCount + 1);
   }, []);
 
-
- 
   useEffect(() => {
     getWorkoutRef();
     getWorkout();
@@ -86,6 +82,7 @@ export default function Workouts() {
         accessorKey: "name",
         header: "Nome",
         size: 150,
+        
       },
       {
         accessorKey: "rep",
@@ -111,7 +108,7 @@ export default function Workouts() {
           const categories = row.original.category; // Acessa a propriedade 'category' do objeto original da linha
           if (Array.isArray(categories)) {
             // Verifica se 'category' é um array
-            const categoryNames = categories.map((cat) => cat.name).join(", "); // Mapeia os objetos do array para obter os nomes e junta em uma string separada por vírgulas
+            const categoryNames = categories.map((category) => category.name).join(", "); // Mapeia os objetos do array para obter os nomes e junta em uma string separada por vírgulas
             return <span>{categoryNames}</span>; // Retorna os nomes das categorias como conteúdo da célula
           }
           return null; // Retorna null se 'category' não for um array, ou você pode colocar um valor padrão aqui
@@ -186,6 +183,34 @@ export default function Workouts() {
   const table = useMaterialReactTable({
     columns,
     data: workouts,
+    muiTableBodyCellProps: {
+      //simple styling with the `sx` prop, works just like a style prop in this example
+      sx: {
+        fontSize: '1rem'
+
+      },
+    },
+    muiTableBodyProps: {
+      //simple styling with the `sx` prop, works just like a style prop in this example
+
+      sx: {
+        "& tr:nth-of-type(2n)": {
+         backgroundColor: '#eeeeee!important'
+        },
+      },
+    },
+    muiTableHeadCellProps: {
+      //simple styling with the `sx` prop, works just like a style prop in this example
+      sx: {
+        fontSize: '1.1rem'
+      },
+    },
+    muiTablePaperProps: {
+    
+      sx: {
+        borderRadius: '2%',
+      },
+    },
   });
 
   const handleDeleteExercisePicture = async (e) => {
@@ -228,16 +253,16 @@ export default function Workouts() {
   };
 
   const handleCloseWorkoutModal = () => {
-      setOpenWorkoutModal(false);
-      setCategoryInputClean((prevCount) => prevCount + 1);
-      setModalContentUpdate({
-        name: "",
-        rep: "",
-        serie: "",
-        weight: "",
-        comment: "",
-        exercisePicture: "",
-      });
+    setOpenWorkoutModal(false);
+    setCategoryInputClean((prevCount) => prevCount + 1);
+    setModalContentUpdate({
+      name: "",
+      rep: "",
+      serie: "",
+      weight: "",
+      comment: "",
+      exercisePicture: "",
+    });
     setImageTableShow(undefined);
   };
 
@@ -301,10 +326,11 @@ export default function Workouts() {
             </Button>
           </Container>
           <Box sx={{ pb: 10, width: "100%" }}>
-            <MaterialReactTable table={table} />
+            <MaterialReactTable table={table} 
+            />
           </Box>
         </TabPanel>
-        <TabPanel value="2">
+        <TabPanel value="2" sx={{ width: "100%" }}>
           <WorkoutSet />
         </TabPanel>
       </TabContext>

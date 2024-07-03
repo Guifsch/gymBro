@@ -10,6 +10,7 @@ import {
   signOut,
 } from "../redux/user/userSlice";
 import { snackBarMessageSuccess } from "../redux/snackbar/snackBarSlice";
+import EmailIcon from '@mui/icons-material/Email';
 import { loadingTrue, loadingFalse } from "../redux/loading/loadingSlice";
 import { Button, TextField, Box } from "@mui/material";
 import LogoAvatarStandard from "../assets/icons/logo_standard.jpg";
@@ -200,10 +201,10 @@ function Profile() {
           boxShadow: "5px 5px 15px 1px",
           position: "relative",
           pt: 5,
-          borderRadius: "2%",
+          borderRadius: "5%",
         }}
       >
-        <Typography variant="h4" textAlign="center" sx={{ mb: 3 }}>
+        <Typography variant="h4" textAlign="center" sx={{ mb: 3, fontWeight: 'bold'}}>
           PERFIL
         </Typography>
 
@@ -317,7 +318,7 @@ function Profile() {
               justifyContent: "center",
             }}
           >
-            <AccountCircle sx={{ color: "action.active", mr: 1, my: 0.5 }} />
+            <EmailIcon sx={{ color: "action.active", mr: 1, my: 0.5 }} />
             <TextField
               onChange={handleChange}
               value={formData.email}

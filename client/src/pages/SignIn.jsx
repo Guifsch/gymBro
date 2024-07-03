@@ -85,7 +85,8 @@ function Signin() {
   };
 
   return (
-    <Box  className="flex justify-center items-center h-screen bg-slate-200">
+    <Box  className="flex justify-center items-center h-screen bg-slate-200"
+    >
     <CardMedia
     className=""
        sx={{ width: 1, height: 1, position: 'absolute', filter: 'contrast(0.3)' }}
@@ -102,7 +103,7 @@ function Signin() {
         onSubmit={handleSubmit}
         flexDirection="column"
         component="form"
-        sx={{ backgroundColor: "white", pt: 6, zIndex: 1, boxShadow: '5px 5px 15px 1px' }}
+        sx={{ backgroundColor: "white", pt: 6, zIndex: 1, boxShadow: '5px 5px 15px 1px', borderRadius: '5%' }}
       >
            <Typography variant="h4" textAlign="center">
                   Bem vindo!

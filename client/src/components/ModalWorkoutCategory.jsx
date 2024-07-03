@@ -45,10 +45,11 @@ const style = {
   transform: "translate(-50%, -50%)",
   width: 600,
   height: 700,
+  borderRadius: '2%',
   bgcolor: "background.paper",
   border: "2px solid #000",
   boxShadow: 24,
-  overflow: "scroll",
+  overflow: "overlay",
 };  
 
 export default function ModalWorkoutCategory({ open, handleClose, modalWorkoutCategoryRefreshRef }) {
@@ -288,13 +289,16 @@ export default function ModalWorkoutCategory({ open, handleClose, modalWorkoutCa
                   flexDirection: "column",
                   alignItems: "center",
                   justifyContent: "center",
-                  border: "1px solid",
+                  borderTop: "1px solid #00000061",
+                  borderLeft: "1px solid #00000061",
+                  borderBottom: "1px solid #00000061",
+                  borderRight: "1px solid #00000017",
                   
                 }}
               >
-                
+             
                 {fields.map((item, index) => (
-               
+        
                   <TextField
                     key={index}
                     onChange={(e) => handleChange(e, index)}
@@ -314,7 +318,11 @@ export default function ModalWorkoutCategory({ open, handleClose, modalWorkoutCa
                 ))}
 
                 {fields.length > 0 ? (
-                  <Button onClick={categoryRemove}>X</Button>
+                  <Button 
+                  sx={{position: 'relative',
+                    bottom: '30px',
+                    left: '90px'}}
+                  onClick={categoryRemove}>X</Button>
                   
                 ) : (
                   false
@@ -328,7 +336,9 @@ export default function ModalWorkoutCategory({ open, handleClose, modalWorkoutCa
                   flexDirection: "column",
                   alignItems: "center",
                   justifyContent: "center",
-                  border: "1px solid",
+                  borderTop: "1px solid #00000061",
+                  borderRight: "1px solid #00000061 ",
+                  borderBottom: "1px solid #00000061",
                 }}
               >
                 {workoutsCategorysArray.map((item, index) => (
@@ -340,6 +350,7 @@ export default function ModalWorkoutCategory({ open, handleClose, modalWorkoutCa
                       justifyContent: "space-between",
                     }}
                   >
+              
                     <Typography
                       type="text"
                       required
@@ -356,6 +367,7 @@ export default function ModalWorkoutCategory({ open, handleClose, modalWorkoutCa
                     <Button onClick={() => deleteCategory(item._id)}>
                       Deletar
                     </Button>
+                 
                   </Container>
                 ))}
               </Box>

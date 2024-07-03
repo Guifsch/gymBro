@@ -7,7 +7,7 @@ export const postSet = async (req, res, next) => {
   const { name, comment, selectedItems } = req.body;
 
   try {
-    const workouts = await Workout.find({ _id: { $in: selectedItems } });
+    // const workouts = await Workout.find({ _id: { $in: selectedItems } });
 
     // if (workouts.length !== selectedItems.length) {
     //   return next(
@@ -51,13 +51,13 @@ export const updateSet = async (req, res, next) => {
 
   try {
     // Verificar se os IDs dos exercícios são válidos
-    const workouts = await Workout.find({ _id: { $in: selectedItems } });
+    // const workouts = await Workout.find({ _id: { $in: selectedItems } });
 
-    // if (workouts.length !== selectedItems.length) {
-    //   return next(
-    //     errorHandler(400, "Um ou mais IDs de exercícios são inválidos!")
-    //   );
-    // }
+    if (!selectedItems.length) {
+      return next(
+        errorHandler(400, "Por favor preencha todos os campos obrigatórios!")
+      );
+    }
 
     // Atualizar o set
     const updatedSet = await Set.findByIdAndUpdate(
@@ -85,11 +85,23 @@ export const updateSet = async (req, res, next) => {
       .status(200)
       .json({ message: "Grupo atualizado com sucesso", group: updatedSet });
   } catch (error) {
-    if (error._message && error._message.includes("validation failed")) {
+    if (error._message && error._message.includes("Validation failed")) {
       return next(
         errorHandler(400, "Por favor preencha todos os campos obrigatórios!")
       );
     }
     next(error);
+  }
+};
+
+export const deleteSets = async (req, res, next) => {
+  const id  = req.params.id;
+
+  try {
+    await Set.findByIdAndDelete(id);
+    res.status(200).json("Set deletado com sucesso!");
+  } catch (error) {
+    next(error);
+
   }
 };

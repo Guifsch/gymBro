@@ -2,6 +2,20 @@
 @tailwind components;
 @tailwind utilities;
 
+@font-face {
+    font-family: 'Helvica';
+    src: url('./assets/fonts/Helvetica.ttf') format('truetype');
+    font-weight: normal;
+    font-style: normal;
+}
+
+body {
+    font-family: 'Helvica', sans-serif
+}
+
+/* Unico jeito que consegui acessar o style */
+body .css-6hp17o-MuiList-root-MuiMenu-list  {padding :0} 
+
 .pageMarginTopNavFix {
     padding-top: 64px
 }
@@ -13,13 +27,14 @@
 
 
 
+
 }
 
 /* Track */
 ::-webkit-scrollbar-track {
     background: gainsboro;
-    
-    
+
+
 
 
 
@@ -28,7 +43,7 @@
 /* Handle */
 ::-webkit-scrollbar-thumb {
     background: black;
-    
+
 
 
 }
@@ -36,7 +51,7 @@
 /* Handle on hover */
 ::-webkit-scrollbar-thumb:hover {
     background: #555;
-    
+
 }
 
 html {
@@ -44,6 +59,24 @@ html {
     overflow-y: scroll;
 }
 
-/* #root > div:nth-child(3) {
-    background-color: #e2e8f0
-} */
+
+
+
+.draggable {
+    padding: 10px;
+    margin: 10px 0;
+    background-color: lightblue;
+    cursor: pointer;
+  }
+  
+  .date-cell {
+    min-height: 60px;
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  
+  .date-cell.drag-over {
+    border: 2px dashed #000;
+  }

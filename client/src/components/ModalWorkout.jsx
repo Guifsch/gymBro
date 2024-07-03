@@ -42,7 +42,6 @@ import {
 } from "firebase/storage";
 import axiosConfig from "../utils/axios";
 
-
 const ITEM_HEIGHT = 48;
 const ITEM_PADDING_TOP = 8;
 const MenuProps = {
@@ -57,6 +56,7 @@ const MenuProps = {
 const style = {
   position: "absolute",
   top: "50%",
+  borderRadius: "2%",
   left: "50%",
   transform: "translate(-50%, -50%)",
   width: 1000,
@@ -111,18 +111,17 @@ export default function ModalWorkout({
     console.log(categoryInputClean, "categoryInputClean");
   }, [categoryInputClean]);
 
-
   const getWorkoutCategorys = useCallback(async () => {
     try {
       const response = await axiosInterceptor.get(`/api/category/categorys`, {
         withCredentials: true,
       });
- 
+
       if (response.data.length > 0) {
         setWorkoutsCategorys(response.data[0].categoryItems);
       } else {
-        setWorkoutsCategorys([])
-      } 
+        setWorkoutsCategorys([]);
+      }
     } catch (e) {
       console.log(e, "erro");
     }
@@ -130,11 +129,11 @@ export default function ModalWorkout({
 
   useEffect(() => {
     getWorkoutCategorys();
-    console.log(refreshModalRefCategory, "refresh CATEGORYYYY")
-    console.log(workoutsCategorys, "refresh workoutsCategorys")
+    console.log(refreshModalRefCategory, "refresh CATEGORYYYY");
+    console.log(workoutsCategorys, "refresh workoutsCategorys");
   }, [refreshModalRefCategory, getWorkoutCategorys]);
 
-  const getWorkoutRefValue = (e) => {
+  const getWorkoutRefValue = () => {
     getWorkoutRef((prevCount) => prevCount + 1);
   };
 
@@ -445,6 +444,9 @@ export default function ModalWorkout({
                 variant="standard"
                 autoComplete="on"
                 sx={{
+                  "& input": {
+                    borderBottom: "2px solid black",
+                  },
                   width: "26%",
                   marginRight: "5%",
                 }}
@@ -459,6 +461,9 @@ export default function ModalWorkout({
                 variant="standard"
                 autoComplete="on"
                 sx={{
+                  "& input": {
+                    borderBottom: "2px solid black",
+                  },
                   width: "26%",
                   marginRight: "5%",
                 }}
@@ -473,6 +478,9 @@ export default function ModalWorkout({
                 variant="standard"
                 autoComplete="on"
                 sx={{
+                  "& input": {
+                    borderBottom: "2px solid black",
+                  },
                   width: "26%",
                   marginRight: "5%",
                 }}
@@ -487,6 +495,9 @@ export default function ModalWorkout({
                 variant="standard"
                 autoComplete="on"
                 sx={{
+                  "& input": {
+                    borderBottom: "2px solid black",
+                  },
                   width: "26%",
                   marginRight: "5%",
                   marginTop: "3%",
@@ -500,12 +511,18 @@ export default function ModalWorkout({
                 }}
               >
                 <Box sx={{ minWidth: 80, width: "100%" }}>
-                  <InputLabel sx={{fontSize: '1rem'}} id="demo-simple-select-autowidth-label">
+                  <InputLabel
+                    sx={{ fontSize: "1rem" }}
+                    id="demo-simple-select-autowidth-label"
+                  >
                     Categoria*
                   </InputLabel>
 
                   <Select
-                  sx={{width: '100%'}}
+                    sx={{
+                      borderBottom: "2px solid black",
+                      width: "100%",
+                    }}
                     labelId="demo-simple-select-autowidth-label"
                     id="demo-simple-select-autowidth"
                     value={selectedOption || ""}
@@ -515,8 +532,7 @@ export default function ModalWorkout({
                     label="Selecione uma opção"
                     MenuProps={MenuProps}
                   >
-                    <MenuItem value=""
-                    >
+                    <MenuItem value="">
                       <em>Nenhum</em>
                     </MenuItem>
                     {workoutsCategorys.map((option) => (

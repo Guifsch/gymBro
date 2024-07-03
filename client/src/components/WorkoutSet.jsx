@@ -105,6 +105,21 @@ export default function Workouts() {
     }
   }, []);
 
+  const deleteSet = async (e) => {
+
+    try {
+      const response = await axiosInterceptor.delete(
+        `/api/set/delete/${e._id}`,
+        { withCredentials: true }
+      );
+      console.log(response, "delete response")
+      dispatch(snackBarMessageSuccess("Exclusão bem succedida!"));
+    } catch (e) {
+      console.log(e, "erro");
+    }
+    getSets()
+  };
+
   // useEffect para buscar os exercícios quando o componente é montado
   useEffect(() => {
     getSets();
@@ -114,33 +129,13 @@ export default function Workouts() {
     console.log(selectedItems, "selectedItems");
   }, [selectedItems]);
 
-  // // Função para lidar com o clique em um item da lista
-  // const handleItemClick = (id) => {
-  //   setSelectedItems((prev) => {
-  //     if (prev.includes(id)) {
-  //       // Remove o item se ele já estiver selecionado
-  //       return prev.filter((item) => item !== id);
-  //     } else {
-  //       // Adiciona o item se ele não estiver selecionado
-  //       return [...prev, id];
-  //     }
-  //   });
-  // };
-
-  // const getWorkoutNameById = (id) => {
-  //   for (const category of Object.values(groupedWorkouts)) {
-  //     for (const workout of category) {
-  //       if (workout._id === id) {
-  //         return workout.name;
-  //       }
-  //     }
-  //   }
-  //   return '';
-  // };
+  const modalSetRefreshRef = () => {
+    getSets()
+    console.log("leitura")
+  }
 
   const handleOpenSerieModalUpdate = (e) => {
     setModalContentUpdate(e);
-    console.log(e, "CAMEULA")
     setOpenSerieModal(true);
   };
 
@@ -149,40 +144,64 @@ export default function Workouts() {
   };
 
   const handleCloseSerieModal = () => {
+    setModalContentUpdate({   name: "",
+      comment: "",
+      selectedItems: [],})
     setOpenSerieModal(false);
   };
 
   return (
     <Box className="flex flex-col justify-initial items-center">
       <Loading />
-      <Container
-        sx={{
-          display: "flex",
-          justifyContent: "center",
-          flexWrap: "wrap",
-    
-        }}
+      <Button
+        variant="contained"
+        onClick={handleOpenSerieModal}
+      >
+        <Typography variant="h7" textAlign="center">
+          Enviar Set
+        </Typography>
+      </Button>
+      <Box
+       sx={{
+        display: "flex",
+        justifyContent: "center",
+        marginLeft: '18%'
+      }}
       >
         <Box
             sx={{
               display: "flex",
-              justifyContent: "center",
+              justifyContent: "start",
               flexWrap: "wrap",
-        
+              width: '100%'
             }}
         >
+      
         {sets.map((item, index) => (
+          <Box
+          key={index}
+          sx={{
+            display: "flex",
+            borderRadius: '5%',
+            width: "22%",
+            alignItems: "center",
+            justifyContent: "space-between",
+            flexDirection: "column",
+     
+             margin: '2%',
+             wordBreak: 'break-word',
+             cursor: 'pointer',
+          }}
+          >
           <Container
           onClick={() => handleOpenSerieModalUpdate(item)}
-            key={index}
+        
             sx={{
+              border: 'solid 1px',
               display: "flex",
-              width: "22%",
               alignItems: "center",
               justifyContent: "start",
               flexDirection: "column",
-               border: 'solid 1px',
-               margin: '2%',
                wordBreak: 'break-word',
                cursor: 'pointer'
             }}
@@ -190,9 +209,10 @@ export default function Workouts() {
             <Typography
               type="text"
               required
-              variant="standard"
+              variant="h5"
               autoComplete="on"
               marginTop="10px"
+              sx={{fontWeight: 'bold'}}
             >
               {item.name}
             </Typography>
@@ -205,28 +225,24 @@ export default function Workouts() {
             >
               {item.comment}
             </Typography>
-            <Button></Button>
+         
           </Container>
+       
+          <Button
+          
+            onClick={() => deleteSet(item)}
+            >Deletar</Button>
+            </Box>
+        
         ))}
+      
         </Box>
-      </Container>
-      <Button
-        variant="contained"
-        sx={{
-          mt: 0,
-          mb: "25px",
-          mr: "20px",
-        }}
-        onClick={handleOpenSerieModal}
-      >
-        <Typography variant="h7" textAlign="center">
-          Enviar Set
-        </Typography>
-      </Button>
+        </Box>
       <ModalWorkoutSet
         openSerieModal={openSerieModal}
         handleCloseSerieModal={handleCloseSerieModal}
         modalContentUpdate={modalContentUpdate}
+        modalSetRefreshRef={modalSetRefreshRef}
       />
     </Box>
   );

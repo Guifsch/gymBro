@@ -31,10 +31,12 @@ const style = {
   left: "50%",
   transform: "translate(-50%, -50%)",
   width: 600,
-  height: 500,
+  borderRadius: "2%",
+  height: 470,
   bgcolor: "background.paper",
   border: "2px solid #000",
   boxShadow: 24,
+  overflow: "overlay",
 };
 
 // Função para determinar o estilo de um item na lista com base na sua seleção
@@ -55,6 +57,7 @@ export default function ModalWorkoutSerie({
   openSerieModal,
   handleCloseSerieModal,
   modalContentUpdate,
+  modalSetRefreshRef,
 }) {
   const theme = useTheme(); // Hook do tema do Material-UI para usar estilos do tema
   const [selectedItems, setSelectedItems] = useState([]); // Estado para armazenar os itens selecionados
@@ -80,6 +83,8 @@ export default function ModalWorkoutSerie({
             return e._id;
           })
         );
+      } else {
+        setSelectedItems([]);
       }
       console.log(test, "TEST");
 
@@ -185,6 +190,7 @@ export default function ModalWorkoutSerie({
 
       console.log(e, "erro");
     }
+    getSetsRef();
   };
 
   const submitSetUpdate = async () => {
@@ -197,11 +203,14 @@ export default function ModalWorkoutSerie({
       console.log(response, "updateworkoutresponse");
       dispatch(snackBarMessageSuccess("Atualização completa"));
     } catch (e) {
-      console.log(e, "ERRRO")
-      // dispatch(snackBarMessageError(e.response.data.error));
+      dispatch(snackBarMessageError(e.response.data.error));
     }
+    getSetsRef();
   };
 
+  const getSetsRef = () => {
+    modalSetRefreshRef();
+  };
 
   return (
     <Modal
@@ -264,10 +273,11 @@ export default function ModalWorkoutSerie({
               sx={{
                 "& > div": { height: "100px" },
                 width: "50%",
-                marginTop: "3%",
+                marginTop: "5%",
               }}
             />
-            <Box sx={{ marginTop: "3%" }}>
+            <Box sx={{ marginTop: "3%",
+             }}>
               <FormControl sx={{ m: 1, width: 300 }} variant="filled">
                 <InputLabel id="select-label">Treinos*</InputLabel>
                 <Select
@@ -275,53 +285,62 @@ export default function ModalWorkoutSerie({
                   multiple
                   value={selectedItems}
                   renderValue={(selected) => (
-                    <Box sx={{ display: "flex", flexWrap: "wrap", gap: 0.5 }}>
+                    <Box sx={{ display: "flex", flexWrap: "wrap", gap: 0.5,}}>
                       {selected.map((id) => (
-                        <Chip key={id} label={getWorkoutNameById(id)} />
+                        <Chip 
+                        key={id} label={getWorkoutNameById(id)} sx={{margin: '2px'}}/>
                       ))}
                     </Box>
                   )}
                 >
-                  <MenuItem
-                    value=""
-                    onClick={() => setSelectedItems([])} // Limpa todos os itens selecionados
-                  >
-                    <ListItemText primary="Nenhum" />
-                  </MenuItem>
-                  {Object.keys(groupedWorkouts).map((category) => (
-                    <div key={category}>
-                      <ListSubheader
-                        sx={{
-                          backgroundColor: "black",
-                          color: "white",
-                          fontWeight: "bold",
-                        }}
-                      >
-                        {category}
-                      </ListSubheader>
-                      {groupedWorkouts[category].map((workout) => (
-                        <MenuItem
-                          key={workout._id}
-                          value={workout._id}
-                          style={getStyles(workout._id, selectedItems, theme)}
-                          onClick={() => handleItemClick(workout._id)}
+                  <Box sx={{ overflow: "scroll", height: "250px"}}>
+                    <MenuItem
+                    
+                      value=""
+                      onClick={() => setSelectedItems([])} // Limpa todos os itens selecionados
+                    >
+                      <ListItemText primary="Nenhum" 
+                      
+                      />
+                    </MenuItem>
+                    {Object.keys(groupedWorkouts).map((category) => (
+                      <div key={category}>
+                        <ListSubheader
+                          sx={{
+                            backgroundColor: "black",
+                            color: "white",
+                            fontWeight: "bold",
+                            height: "40px",
+                            display: "flex",
+                            alignItems: "center",
+                          }}
                         >
-                          <Checkbox
-                            checked={selectedItems.indexOf(workout._id) > -1}
-                            tabIndex={-1}
-                            disableRipple
-                          />
-                          <ListItemText primary={workout.name} />
-                        </MenuItem>
-                      ))}
-                    </div>
-                  ))}
+                          {category}
+                        </ListSubheader>
+                        {groupedWorkouts[category].map((workout) => (
+                          <MenuItem
+                            key={workout._id}
+                            value={workout._id}
+                            style={getStyles(workout._id, selectedItems, theme)}
+                            onClick={() => handleItemClick(workout._id)}
+                          >
+                            <Checkbox
+                              checked={selectedItems.indexOf(workout._id) > -1}
+                              tabIndex={-1}
+                              disableRipple
+                            />
+                            <ListItemText primary={workout.name} />
+                          </MenuItem>
+                        ))}
+                      </div>
+                    ))}
+                  </Box>
                 </Select>
               </FormControl>
             </Box>
           </Container>
 
-          {Object.values(modalContentUpdate).every((value) => value === "") ? (
+          {modalContentUpdate.name === "" ? (
             <Button
               sx={{
                 mt: 5,
