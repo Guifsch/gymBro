@@ -106,18 +106,17 @@ export default function Workouts() {
   }, []);
 
   const deleteSet = async (e) => {
-
     try {
       const response = await axiosInterceptor.delete(
         `/api/set/delete/${e._id}`,
         { withCredentials: true }
       );
-      console.log(response, "delete response")
+      console.log(response, "delete response");
       dispatch(snackBarMessageSuccess("Exclusão bem succedida!"));
     } catch (e) {
       console.log(e, "erro");
     }
-    getSets()
+    getSets();
   };
 
   // useEffect para buscar os exercícios quando o componente é montado
@@ -130,9 +129,9 @@ export default function Workouts() {
   }, [selectedItems]);
 
   const modalSetRefreshRef = () => {
-    getSets()
-    console.log("leitura")
-  }
+    getSets();
+    console.log("leitura");
+  };
 
   const handleOpenSerieModalUpdate = (e) => {
     setModalContentUpdate(e);
@@ -144,100 +143,92 @@ export default function Workouts() {
   };
 
   const handleCloseSerieModal = () => {
-    setModalContentUpdate({   name: "",
-      comment: "",
-      selectedItems: [],})
+    setModalContentUpdate({ name: "", comment: "", selectedItems: [] });
     setOpenSerieModal(false);
   };
 
   return (
     <Box className="flex flex-col justify-initial items-center">
       <Loading />
-      <Button
-        variant="contained"
-        onClick={handleOpenSerieModal}
-      >
+      <Button variant="contained" onClick={handleOpenSerieModal}>
         <Typography variant="h7" textAlign="center">
           Enviar Set
         </Typography>
       </Button>
       <Box
-       sx={{
-        display: "flex",
-        justifyContent: "center",
-        marginLeft: '18%'
-      }}
+        sx={{
+          display: "flex",
+          justifyContent: "center",
+          marginLeft: "13%",
+          width: '100%'
+        }}
       >
         <Box
-            sx={{
-              display: "flex",
-              justifyContent: "start",
-              flexWrap: "wrap",
-              width: '100%'
-            }}
-        >
-      
-        {sets.map((item, index) => (
-          <Box
-          key={index}
           sx={{
             display: "flex",
-            borderRadius: '5%',
-            width: "22%",
-            alignItems: "center",
-            justifyContent: "space-between",
-            flexDirection: "column",
-     
-             margin: '2%',
-             wordBreak: 'break-word',
-             cursor: 'pointer',
+            justifyContent: "start",
+            flexWrap: "wrap",
+            width: "100%",
           }}
-          >
-          <Container
-          onClick={() => handleOpenSerieModalUpdate(item)}
-        
-            sx={{
-              border: 'solid 1px',
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "start",
-              flexDirection: "column",
-               wordBreak: 'break-word',
-               cursor: 'pointer'
-            }}
-          >
-            <Typography
-              type="text"
-              required
-              variant="h5"
-              autoComplete="on"
-              marginTop="10px"
-              sx={{fontWeight: 'bold'}}
+        >
+          {sets.map((item, index) => (
+            <Box
+              key={index}
+              sx={{
+                display: "flex",
+                borderRadius: "5%",
+                width: "22%",
+                alignItems: "center",
+                justifyContent: "start",
+                flexDirection: "column",
+
+                margin: "2%",
+                wordBreak: "break-word",
+                cursor: "pointer",
+              }}
             >
-              {item.name}
-            </Typography>
-            <Typography
-              type="text"
-              required
-              variant="standard"
-              autoComplete="on"
-              marginY="10px"
-            >
-              {item.comment}
-            </Typography>
-         
-          </Container>
-       
-          <Button
-          
-            onClick={() => deleteSet(item)}
-            >Deletar</Button>
+              <Button
+                sx={{ marginTop: "10px" }}
+                onClick={() => deleteSet(item)}
+              >
+                Deletar
+              </Button>
+              <Container
+                onClick={() => handleOpenSerieModalUpdate(item)}
+                sx={{
+                  border: "solid 1px",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "start",
+                  flexDirection: "column",
+                  wordBreak: "break-word",
+                  cursor: "pointer",
+                }}
+              >
+                <Typography
+                  type="text"
+                  required
+                  variant="h5"
+                  autoComplete="on"
+                  marginTop="10px"
+                  sx={{ fontWeight: "bold" }}
+                >
+                  {item.name}
+                </Typography>
+                <Typography
+                  type="text"
+                  required
+                  variant="standard"
+                  autoComplete="on"
+                  marginY="10px"
+                >
+                  {item.comment}
+                </Typography>
+              </Container>
             </Box>
-        
-        ))}
-      
+          ))}
         </Box>
-        </Box>
+      </Box>
       <ModalWorkoutSet
         openSerieModal={openSerieModal}
         handleCloseSerieModal={handleCloseSerieModal}

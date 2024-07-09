@@ -354,7 +354,7 @@ export default function ModalWorkoutSerie({
           ) : (
             <Button
               sx={{
-                mt: 5,
+                my: 5,
               }}
               variant="contained"
               type="submit"

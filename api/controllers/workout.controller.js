@@ -12,6 +12,7 @@ import { errorHandler } from "../utils/error.js";
 // };
 
 export const postWorkouts = async (req, res, next) => {
+  console.log(req.user.id, "userId")
   const newWorkout = new Workout({
     ...req.body,
     userId: req.user.id,

@@ -4,7 +4,16 @@ import Set from "../models/set.model.js";
 import { errorHandler } from "../utils/error.js";
 
 export const postSet = async (req, res, next) => {
+  console.log(req.user, "req.userreq.user")
+  const userId = req.user.id
   const { name, comment, selectedItems } = req.body;
+
+  const newSet = new Set({
+    name,
+    userId,
+    comment,
+    selectedItems: selectedItems,
+  });
 
   try {
     // const workouts = await Workout.find({ _id: { $in: selectedItems } });
@@ -15,14 +24,9 @@ export const postSet = async (req, res, next) => {
     //   );
     // }
 
-    const newSet = new Set({
-      name,
-      comment,
-      selectedItems: selectedItems,
-    });
+   
 
     await newSet.save();
-
     res
       .status(201)
       .json({ message: "Grupo criado com sucesso", group: newSet });
@@ -37,8 +41,9 @@ export const postSet = async (req, res, next) => {
 };
 
 export const getSet = async (req, res, next) => {
+  const userId = req.user.id;
   try {
-    const groups = await Set.find().populate("selectedItems");
+    const groups = await Set.find({ userId }).populate("selectedItems");
     res.status(200).json(groups);
   } catch (error) {
     next(error);

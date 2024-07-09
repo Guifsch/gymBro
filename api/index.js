@@ -6,6 +6,7 @@ import userRoutes from "./routes/user.route.js";
 import authRoutes from "./routes/auth.route.js";
 import workoutRoutes from "./routes/workout.route.js";
 import categoryRoutes from "./routes/category.route.js";
+import calendarRoutes from "./routes/calendar.route.js";
 import setRoutes from "./routes/set.route.js";
 import cookieParser from "cookie-parser";
 dotenv.config();
@@ -42,6 +43,7 @@ app.use("/api/auth", authRoutes);
 app.use("/api/workout", workoutRoutes)
 app.use("/api/category", categoryRoutes)
 app.use("/api/set", setRoutes)
+app.use("/api/calendar", calendarRoutes)
 
 
 app.use((err, req, res, next) => {
