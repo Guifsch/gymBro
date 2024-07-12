@@ -3,25 +3,35 @@ import {
   MaterialReactTable,
   useMaterialReactTable,
 } from "material-react-table";
-import ModalWorkout from "../components/ModalWorkout";
-import Tab from "@mui/material/Tab";
-import { TabContext, TabPanel, TabList } from "@mui/lab";
-import WorkoutSet from "../components/WorkoutSet";
-import Button from "@mui/material/Button";
-import React, { useCallback, useState, useEffect } from "react";
 import axiosConfig from "../utils/axios";
-import Typography from "@mui/material/Typography";
-import IconButton from "@mui/material/IconButton";
+import ModalWorkout from "../components/ModalWorkout";
+import WorkoutSet from "../components/WorkoutSet";
+import GenericImage from "../assets/generic-image.png";
+import ImageWithPlaceholder from "../utils/imagePlaceHolderUntilLoad";
+import ModalWorkoutCategory from "../components/ModalWorkoutCategory";
+import {
+  Tab,
+  Button,
+  Typography,
+  IconButton,
+  Box,
+  Container,
+} from "@mui/material";
 import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
+import { TabContext, TabPanel, TabList } from "@mui/lab";
+import React, { useCallback, useState, useEffect } from "react";
+
 import Loading from "../components/Loading";
 import { useDispatch } from "react-redux";
 import { loadingTrue, loadingFalse } from "../redux/loading/loadingSlice";
-import { snackBarMessageSuccess } from "../redux/snackbar/snackBarSlice";
+import {
+  snackBarMessageSuccess,
+  snackBarMessageError,
+} from "../redux/snackbar/snackBarSlice";
+
 import { getStorage, ref, deleteObject } from "firebase/storage";
 import { app } from "../firebase";
-import { Box, Container } from "@mui/material";
-import ModalWorkoutCategory from "../components/ModalWorkoutCategory";
 
 export default function Workouts() {
   const axiosInterceptor = axiosConfig();
@@ -40,6 +50,7 @@ export default function Workouts() {
     weight: "",
     exercisePicture: "",
     comment: "",
+    category: "",
   });
   const [workouts, setWorkouts] = useState([]);
   const [getWorkoutRefUpdate, setGetWorkoutRefUpdate] = useState(1);
@@ -54,9 +65,8 @@ export default function Workouts() {
         withCredentials: true,
       });
       setWorkouts(response.data.workouts);
-      console.log(response.data.workouts, "workouts");
     } catch (e) {
-      console.log(e, "erro");
+      dispatch(snackBarMessageError(e.response.data.error));
     }
   }, []);
 
@@ -82,7 +92,6 @@ export default function Workouts() {
         accessorKey: "name",
         header: "Nome",
         size: 150,
-        
       },
       {
         accessorKey: "rep",
@@ -108,7 +117,9 @@ export default function Workouts() {
           const categories = row.original.category; // Acessa a propriedade 'category' do objeto original da linha
           if (Array.isArray(categories)) {
             // Verifica se 'category' é um array
-            const categoryNames = categories.map((category) => category.name).join(", "); // Mapeia os objetos do array para obter os nomes e junta em uma string separada por vírgulas
+            const categoryNames = categories
+              .map((category) => category.name)
+              .join(", "); // Mapeia os objetos do array para obter os nomes e junta em uma string separada por vírgulas
             return <span>{categoryNames}</span>; // Retorna os nomes das categorias como conteúdo da célula
           }
           return null; // Retorna null se 'category' não for um array, ou você pode colocar um valor padrão aqui
@@ -124,6 +135,7 @@ export default function Workouts() {
             onClick={() => handleShowImage(row.original.exercisePicture)}
             sx={{
               display: "flex",
+              cursor: "pointer",
               alignItems: "center",
               gap: "1rem",
               transition: "0.2s",
@@ -133,18 +145,26 @@ export default function Workouts() {
               },
             }}
           >
-            <img
-              alt="avatar"
-              height={30}
-              src={row.original.exercisePicture}
-              loading="lazy"
-              style={{
-                width: "100px",
-                height: "100px",
-                objectFit: "cover",
-                cursor: "pointer",
-              }}
-            />
+            {row.original.exercisePicture ? (
+              <ImageWithPlaceholder
+                src={row.original.exercisePicture}
+                alt="Imagem do treino"
+                width="100px"
+                height="100px"
+              />
+            ) : (
+              <img
+                alt="avatar"
+                src={GenericImage}
+                loading="lazy"
+                style={{
+                  width: "100px",
+                  height: "100px",
+                  objectFit: "cover",
+                  cursor: "pointer",
+                }}
+              />
+            )}
           </Box>
         ),
       },
@@ -186,8 +206,7 @@ export default function Workouts() {
     muiTableBodyCellProps: {
       //simple styling with the `sx` prop, works just like a style prop in this example
       sx: {
-        fontSize: '1rem'
-
+        fontSize: "1rem",
       },
     },
     muiTableBodyProps: {
@@ -195,20 +214,19 @@ export default function Workouts() {
 
       sx: {
         "& tr:nth-of-type(2n)": {
-         backgroundColor: '#eeeeee!important'
+          backgroundColor: "#eeeeee!important",
         },
       },
     },
     muiTableHeadCellProps: {
       //simple styling with the `sx` prop, works just like a style prop in this example
       sx: {
-        fontSize: '1.1rem'
+        fontSize: "1.1rem",
       },
     },
     muiTablePaperProps: {
-    
       sx: {
-        borderRadius: '2%',
+        borderRadius: "2%",
       },
     },
   });
@@ -223,10 +241,9 @@ export default function Workouts() {
         `/api/workout/workouts/${e._id}`,
         { withCredentials: true }
       );
-      console.log(response, "resposta");
-      dispatch(snackBarMessageSuccess("Exclusão bem succedida!"));
+      dispatch(snackBarMessageSuccess(response.data.message));
     } catch (e) {
-      console.log(e, "erro");
+      dispatch(snackBarMessageError(e.response.data.error));
     }
     getWorkout();
     dispatch(loadingFalse());
@@ -262,18 +279,23 @@ export default function Workouts() {
       weight: "",
       comment: "",
       exercisePicture: "",
+      category: "",
     });
     setImageTableShow(undefined);
   };
 
   const handleShowImage = (e) => {
-    setImageTableShow(e);
-    setOpenWorkoutModal(true);
+    if (e) {
+      setImageTableShow(e);
+      setOpenWorkoutModal(true);
+    } else {
+      return;
+    }
   };
 
   //Category modal
 
-  const handleOpenCategoryModal = (e) => {
+  const handleOpenCategoryModal = () => {
     setOpenCategoryModal(true);
   };
 
@@ -283,7 +305,7 @@ export default function Workouts() {
 
   return (
     <Box className="flex flex-col justify-initial items-center pageMarginTopNavFix">
-      <Loading />
+      <Loading top="64px" />
       <TabContext value={valueTab}>
         <Box sx={{ borderBottom: 1, borderColor: "divider", marginTop: 5 }}>
           <TabList onChange={handleChangeTab} aria-label="lab API tabs example">
@@ -326,8 +348,7 @@ export default function Workouts() {
             </Button>
           </Container>
           <Box sx={{ pb: 10, width: "100%" }}>
-            <MaterialReactTable table={table} 
-            />
+            <MaterialReactTable table={table} />
           </Box>
         </TabPanel>
         <TabPanel value="2" sx={{ width: "100%" }}>

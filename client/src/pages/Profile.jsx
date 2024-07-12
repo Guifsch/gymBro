@@ -1,34 +1,28 @@
 import { React, useRef, useState, useEffect, useCallback } from "react";
+import { Button, TextField, Box, Container, Typography } from "@mui/material";
 import { useSelector, useDispatch } from "react-redux";
 import axiosConfig from "../utils/axios";
+import { deleteUserSuccess, updateUserSuccess } from "../redux/user/userSlice";
 import {
-  signInStart,
-  signInSuccess,
-  signInFailure,
-  deleteUserSuccess,
-  updateUserSuccess,
-  signOut,
-} from "../redux/user/userSlice";
-import { snackBarMessageSuccess } from "../redux/snackbar/snackBarSlice";
-import EmailIcon from '@mui/icons-material/Email';
+  snackBarMessageSuccess,
+  snackBarMessageError,
+} from "../redux/snackbar/snackBarSlice";
 import { loadingTrue, loadingFalse } from "../redux/loading/loadingSlice";
-import { Button, TextField, Box } from "@mui/material";
-import LogoAvatarStandard from "../assets/icons/logo_standard.jpg";
-import Container from "@mui/material/Container";
-import Typography from "@mui/material/Typography";
+import EmailIcon from "@mui/icons-material/Email";
 import LockIcon from "@mui/icons-material/Lock";
 import AccountCircle from "@mui/icons-material/AccountCircle";
-import CardMedia from "@mui/material/CardMedia";
 import CreateIcon from "@mui/icons-material/Create";
 import Loading from "../components/Loading";
-import CircularProgress from "@mui/material/CircularProgress";
+import LogoAvatarStandard from "../assets/icons/logo_standard.jpg";
+import ImageWithPlaceholder from "../utils/imagePlaceHolderUntilLoad";
+
 // --FIREBASE STORAGE--
 import {
   getStorage,
   uploadBytesResumable,
   ref,
   getDownloadURL,
-  deleteObject
+  deleteObject,
 } from "firebase/storage";
 import { app } from "../firebase";
 
@@ -38,9 +32,7 @@ function Profile() {
   // --FIREBASE STORAGE--
   const [image, setImage] = useState(null);
   const [imagePreview, setImagePreviewImage] = useState(null);
-  const [loading, setLoading] = useState(false);
   const [imagePercent, setImagePercent] = useState(0);
-  const [downloadedURL, setDownloadedURL] = useState({});
   const [imageError, setImageError] = useState(false);
   const fileRef = useRef(null);
   const [formData, setFormData] = useState({
@@ -59,9 +51,8 @@ function Profile() {
         { withCredentials: true }
       );
       setFormData(response.data);
-      console.log(currentUser._id, "PROFILE");
     } catch (e) {
-      console.log(e, "erro");
+      dispatch(snackBarMessageError(error.response.data.error));
     }
   }, []);
 
@@ -71,10 +62,10 @@ function Profile() {
 
   const profileImage = async (e) => {
     const image = e.target.files[0];
-
     setImage(image);
     let fileReader;
-    if (image) {
+
+    if (image && image.type.startsWith("image/")) {
       fileReader = new FileReader();
       fileReader.onload = (e) => {
         const { result } = e.target;
@@ -83,13 +74,18 @@ function Profile() {
         }
       };
       fileReader.readAsDataURL(image);
+    } else {
+      if (fileRef.current) {
+        fileRef.current.value = ""; // Resetar o valor do input do tipo file
+      }
+      setImage(null);
+      dispatch(snackBarMessageError("Formato ou tamanho incorreto da imagem!"));
     }
   };
 
   const handleFileUpload = async (image) => {
     try {
       const storage = getStorage(app);
-      console.log(storage, "STORAGE");
       const newDirectory = currentUser.username;
       const fileName = new Date().getTime() + image.name;
       const storageRef = ref(storage, `${newDirectory}/${fileName}`);
@@ -117,7 +113,6 @@ function Profile() {
 
       const fileRef = await uploadTaskPromise(storageRef, image);
       const downloadURL = await getDownloadURL(fileRef);
-
       return downloadURL;
     } catch (error) {
       console.error("Error uploading file:", error);
@@ -169,7 +164,7 @@ function Profile() {
       console.log(response, "resposta");
       dispatch(deleteUserSuccess(response.data)); //loading, error para false e o envio do action.payload vindo do userSlice
     } catch (e) {
-      console.log(e, "erro");
+      dispatch(snackBarMessageError(e.response.data.error));
     }
   };
 
@@ -180,12 +175,13 @@ function Profile() {
       deleteObject(imageRef);
     } catch (e) {
       console.log(e);
+      throw e;
     }
   };
 
   return (
     <Box className="flex justify-center items-center h-screen">
-      <Loading />
+      <Loading top="64px" />
       <Box
         height={600}
         width={450}
@@ -204,7 +200,11 @@ function Profile() {
           borderRadius: "5%",
         }}
       >
-        <Typography variant="h4" textAlign="center" sx={{ mb: 3, fontWeight: 'bold'}}>
+        <Typography
+          variant="h4"
+          textAlign="center"
+          sx={{ mb: 3, fontWeight: "bold" }}
+        >
           PERFIL
         </Typography>
 
@@ -231,22 +231,24 @@ function Profile() {
               accept="image/*"
               onChange={(e) => profileImage(e)}
             />
-            <CardMedia
-              component="img"
-              sx={{
-                objectFit: "cover",
-                cursor: "pointer",
-                height: "100px",
-                transition: "0.5s",
-                width: "100px",
-                borderRadius: "50%",
-                "&:hover": {
-                  filter: "contrast(0.3)",
-                  transition: "0.5s",
-                },
-              }}
-              image={imagePreview || formData.profilePicture}
-            ></CardMedia>
+
+            {formData.profilePicture ? (
+              <ImageWithPlaceholder
+                src={imagePreview || formData.profilePicture}
+                alt="Imagem não encontrada"
+                width="100px"
+                height="100px"
+                borderRadius="50%"
+              />
+            ) : (
+              <ImageWithPlaceholder
+                src={imagePreview || LogoAvatarStandard}
+                alt="Imagem não encontrada"
+                width="100px"
+                height="100px"
+                borderRadius="50%"
+              />
+            )}
             <CreateIcon
               sx={{
                 position: "absolute",

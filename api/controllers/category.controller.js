@@ -21,8 +21,9 @@ export const postCategorys = async (req, res, next) => {
         errorHandler(400, `Itens duplicados não são permitidos!`)
       );
     }
-    const saveNewCategorys = await newCategorys.save();
-    res.status(201).json(saveNewCategorys);
+    await newCategorys.save();
+ 
+    res.status(200).json({ message: "Categoria salva com sucesso"});
   } catch (error) {
     if (error._message.includes("Category validation failed")){
       return next(
@@ -40,7 +41,9 @@ export const getCategorys = async (req, res, next) => {
     const categorys = await Category.find({ userId });
     res.status(200).json(categorys);
   } catch (error) {
-    next(error);
+    next(
+      errorHandler(400, "Oops, algo deu errado!")
+    );
   }
 };
 
@@ -61,9 +64,6 @@ export const updateCategorys = async (req, res, next) => {
     const names = categoryItems.map(item => item.name);
     const duplicatesInRequest = names.filter((item, index) => names.indexOf(item) !== index);
 
-
-    
-    
     if (duplicatesInRequest.length > 0) {
       return next(
         errorHandler(400, `Itens duplicados não são permitidos!`)
@@ -112,7 +112,7 @@ export const updateCategorys = async (req, res, next) => {
     updatedCategoryItems.forEach(newItem => item.categoryItems.push(newItem));
 
     await item.save();
-    res.status(200).send(item);
+    res.status(200).json({ message: "Categoria salva com sucesso"});
   } catch (error) {
     if (error._message.includes("Category validation failed")){
       return next(
@@ -148,8 +148,10 @@ export const deleteCategorys = async (req, res, next) => {
       }
 
       await item.save();
-      res.status(200).send(item);
+      res.status(200).send({ message: "Exclusão bem succedida!" });
   } catch (error) {
-      next(error);
+     next(
+      errorHandler(400, "Oops, algo deu errado!")
+    );
   }
 }

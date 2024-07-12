@@ -1,37 +1,28 @@
-import Modal from "@mui/material/Modal";
-import Fade from "@mui/material/Fade";
-import IconButton from "@mui/material/IconButton";
-import Typography from "@mui/material/Typography";
-import { styled } from "@mui/material/styles";
-import Button from "@mui/material/Button";
+import {
+  Box,
+  Container,
+  Modal,
+  IconButton,
+  Typography,
+  Button,
+  CardMedia,
+  TextField,
+  Backdrop,
+  InputLabel,
+  MenuItem,
+  Select,
+  CircularProgress,
+} from "@mui/material";
+import ImageWithPlaceholder from "../utils/imagePlaceHolderUntilLoad";
 import CloseIcon from "@mui/icons-material/Close";
-import CardMedia from "@mui/material/CardMedia";
-import FormControlLabel from "@mui/material/FormControlLabel";
-import Switch from "@mui/material/Switch";
-import { TextField } from "@mui/material";
-import Backdrop from "@mui/material/Backdrop";
-import InputLabel from "@mui/material/InputLabel";
-import MenuItem from "@mui/material/MenuItem";
-import FormControl from "@mui/material/FormControl";
-import Select from "@mui/material/Select";
-import CircularProgress from "@mui/material/CircularProgress";
-import { loadingTrue, loadingFalse } from "../redux/loading/loadingSlice";
 import {
   snackBarMessageSuccess,
   snackBarMessageError,
 } from "../redux/snackbar/snackBarSlice";
-import {
-  signInStart,
-  signInSuccess,
-  signInFailure,
-  deleteUserSuccess,
-  updateUserSuccess,
-  signOut,
-} from "../redux/user/userSlice";
-import { Container } from "@mui/material";
+
+import { validateInputPost } from "../utils/validateInputPost";
 import { useSelector, useDispatch } from "react-redux";
-import React, { useCallback, useState, useEffect } from "react";
-import { Box } from "@mui/material";
+import React, { useCallback, useState, useEffect, useRef } from "react";
 import { app } from "../firebase";
 import {
   getStorage,
@@ -59,10 +50,11 @@ const style = {
   borderRadius: "2%",
   left: "50%",
   transform: "translate(-50%, -50%)",
-  width: 1000,
-  height: 800,
+  maxWidth: 1000,
+  maxHeight: 1000,
   bgcolor: "background.paper",
   border: "2px solid #000",
+  overflowY: "overlay",
   boxShadow: 24,
 };
 
@@ -85,6 +77,7 @@ export default function ModalWorkout({
     weight: "",
     exercisePicture: "",
     comment: "",
+    category: "",
   });
   const [loading, setLoading] = useState(false);
   const [imagePreview, setImagePreview] = useState(null);
@@ -92,6 +85,7 @@ export default function ModalWorkout({
   const [workoutsCategorys, setWorkoutsCategorys] = useState([]);
   const [selectedOption, setSelectedOption] = useState("");
   const { currentUser } = useSelector((state) => state.user);
+  const fileRef = useRef(null);
   useEffect(() => {
     try {
       if (modalContentUpdate.category && modalContentUpdate.category.length > 0)
@@ -108,7 +102,6 @@ export default function ModalWorkout({
     } catch (e) {
       console.log(e);
     }
-    console.log(categoryInputClean, "categoryInputClean");
   }, [categoryInputClean]);
 
   const getWorkoutCategorys = useCallback(async () => {
@@ -123,14 +116,12 @@ export default function ModalWorkout({
         setWorkoutsCategorys([]);
       }
     } catch (e) {
-      console.log(e, "erro");
+      dispatch(snackBarMessageError(e.response.data.error));
     }
   }, []);
 
   useEffect(() => {
     getWorkoutCategorys();
-    console.log(refreshModalRefCategory, "refresh CATEGORYYYY");
-    console.log(workoutsCategorys, "refresh workoutsCategorys");
   }, [refreshModalRefCategory, getWorkoutCategorys]);
 
   const getWorkoutRefValue = () => {
@@ -139,7 +130,6 @@ export default function ModalWorkout({
 
   const handleChange = (e) => {
     setContent({ ...content, [e.target.id]: e.target.value });
-    console.log(content, "CONTENT");
   };
 
   const handleChangeCategory = (event) => {
@@ -152,21 +142,18 @@ export default function ModalWorkout({
       const selectedOptionObject = workoutsCategorys.find(
         (option) => option._id === selectedId
       );
-      console.log(selectedOptionObject, "selectedOptionObject");
 
       // Verificar se selectedOptionObject foi encontrado
       if (selectedOptionObject) {
         // Atualizar o conteúdo com a nova selectedOption e category
         setContent((prevContent) => ({
           ...prevContent,
-          selectedOption: selectedOptionObject,
           category: selectedOptionObject,
         }));
       } else {
         // Caso selectedOptionObject não seja encontrado, limpar o conteúdo relacionado à opção selecionada
         setContent((prevContent) => ({
           ...prevContent,
-          selectedOption: null, // Limpa selectedOption
           category: "", // Limpa category
         }));
       }
@@ -174,32 +161,40 @@ export default function ModalWorkout({
       // Caso selecionado "Nenhum", limpar o conteúdo relacionado à opção selecionada
       setContent((prevContent) => ({
         ...prevContent,
-        selectedOption: null, // Limpa selectedOption
         category: "", // Limpa category
       }));
     }
   };
+
   const profileImage = async (e) => {
     const image = e.target.files[0];
 
-    setImage(image);
-    let fileReader;
-    if (image) {
-      fileReader = new FileReader();
-      fileReader.onload = (e) => {
-        const { result } = e.target;
-        if (result) {
-          setImagePreview(result);
-        }
-      };
-      fileReader.readAsDataURL(image);
+    if (image && image.type.startsWith("image/")) {
+      setImage(image);
+      let fileReader;
+      if (image) {
+        fileReader = new FileReader();
+        fileReader.onload = (e) => {
+          const { result } = e.target;
+          if (result) {
+            setImagePreview(result);
+          }
+        };
+        fileReader.readAsDataURL(image);
+      }
+    } else {
+      if (fileRef.current) {
+        fileRef.current.value = ""; // Resetar o valor do input do tipo file
+      }
+      setImagePreview(null);
+      setImage(null);
+      dispatch(snackBarMessageError("Formato ou tamanho incorreto da imagem!"));
     }
   };
 
   const handleFileUpload = async (image) => {
     try {
       const storage = getStorage(app);
-      console.log(storage, "STORAGE");
       const newDirectory = currentUser.username;
       const fileName = new Date().getTime() + image.name;
       const storageRef = ref(storage, `${newDirectory}/${fileName}`);
@@ -238,8 +233,11 @@ export default function ModalWorkout({
 
   const submitWorkout = async (e) => {
     setLoading(true);
+
     try {
       let updatedContent = { ...content };
+      //Validação para evitar que o firabase registre a imagem mesmo tendo campos vazios
+      validateInputPost(updatedContent, ["exercisePicture", "comment"]);
 
       if (imagePreview) {
         const imageUrl = await handleFileUpload(image);
@@ -253,8 +251,9 @@ export default function ModalWorkout({
         { withCredentials: true }
       );
       console.log(response, "response");
-      dispatch(snackBarMessageSuccess("Treino salvo"));
+      dispatch(snackBarMessageSuccess(response.data.message));
     } catch (e) {
+      console.log();
       dispatch(snackBarMessageError(e.response.data.error));
 
       console.log(e, "erro");
@@ -267,16 +266,21 @@ export default function ModalWorkout({
       weight: "",
       exercisePicture: "",
       comment: "",
+      category: "",
     });
     setSelectedOption(null);
-    setImagePreview(undefined);
+    setImagePreview(null);
     getWorkoutRefValue();
+    if (fileRef.current) {
+      fileRef.current.value = ""; // Resetar o valor do input do tipo file
+    }
   };
 
   const submitWorkoutUpdate = async () => {
     setLoading(true);
     try {
       let workoutUpdated = { ...content };
+
       if (imagePreview) {
         await removeImageFirebase(modalContentUpdate.exercisePicture);
         console.log(content.profilePicture, "content.profilePicture");
@@ -349,8 +353,8 @@ export default function ModalWorkout({
             textAlign="center"
             sx={{
               position: "absolute",
-              right: "40%",
-              left: "40%",
+              right: "25%",
+              left: "25%",
               top: "5px",
               fontSize: "0.8em",
               color: "red",
@@ -379,8 +383,8 @@ export default function ModalWorkout({
                 width: "80px!important",
                 height: "80px!important",
                 position: "absolute",
-                left: "43%",
-                top: "43%",
+                left: "45%",
+                top: "40%",
               }}
             />
           </Box>
@@ -591,7 +595,7 @@ export default function ModalWorkout({
                 display: "flex",
                 flexDirection: "column",
                 alignItems: "center",
-                my: 5,
+                py: 5,
               }}
             >
               <input
@@ -599,17 +603,15 @@ export default function ModalWorkout({
                 accept="image/png, image/jpeg"
                 placeholder="Type some text"
                 onChange={(e) => profileImage(e)}
+                ref={fileRef}
               />
               {imagePreview || content.exercisePicture ? (
-                <CardMedia
-                  component="img"
-                  sx={{
-                    objectFit: "cover",
-                    mt: 5,
-                    height: "300px",
-                    width: "450px",
-                  }}
-                  image={imagePreview || content.exercisePicture}
+                <ImageWithPlaceholder
+                  src={imagePreview || content.exercisePicture}
+                  alt="Imagem do treino"
+                  width="300px"
+                  height="450px"
+                  paddingTop="30px"
                 />
               ) : (
                 <Typography

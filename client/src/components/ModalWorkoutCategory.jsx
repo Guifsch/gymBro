@@ -1,41 +1,21 @@
-import Modal from "@mui/material/Modal";
-import Fade from "@mui/material/Fade";
-import IconButton from "@mui/material/IconButton";
-import Typography from "@mui/material/Typography";
-import { styled } from "@mui/material/styles";
-import Button from "@mui/material/Button";
+import {
+  Container,
+  Modal,
+  IconButton,
+  Typography,
+  Button,
+  TextField,
+  Backdrop,
+  CircularProgress,
+  Box,
+} from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
-import CardMedia from "@mui/material/CardMedia";
-import FormControlLabel from "@mui/material/FormControlLabel";
-import Switch from "@mui/material/Switch";
-import { TextField } from "@mui/material";
-import Backdrop from "@mui/material/Backdrop";
-import CircularProgress from "@mui/material/CircularProgress";
-import { loadingTrue, loadingFalse } from "../redux/loading/loadingSlice";
 import {
   snackBarMessageSuccess,
   snackBarMessageError,
 } from "../redux/snackbar/snackBarSlice";
-import {
-  signInStart,
-  signInSuccess,
-  signInFailure,
-  deleteUserSuccess,
-  updateUserSuccess,
-  signOut,
-} from "../redux/user/userSlice";
-import { Container } from "@mui/material";
-import { useSelector, useDispatch } from "react-redux";
+import { useDispatch } from "react-redux";
 import React, { useCallback, useState, useEffect } from "react";
-import { Box } from "@mui/material";
-import { app } from "../firebase";
-import {
-  getStorage,
-  uploadBytesResumable,
-  ref,
-  getDownloadURL,
-  deleteObject,
-} from "firebase/storage";
 import axiosConfig from "../utils/axios";
 
 const style = {
@@ -45,20 +25,20 @@ const style = {
   transform: "translate(-50%, -50%)",
   width: 600,
   height: 700,
-  borderRadius: '2%',
+  borderRadius: "2%",
   bgcolor: "background.paper",
   border: "2px solid #000",
   boxShadow: 24,
   overflow: "overlay",
-};  
+};
 
-export default function ModalWorkoutCategory({ open, handleClose, modalWorkoutCategoryRefreshRef }) {
+export default function ModalWorkoutCategory({
+  open,
+  handleClose,
+  modalWorkoutCategoryRefreshRef,
+}) {
   const axiosInterceptor = axiosConfig();
-  // const [openModal, setOpenModal] = React.useState(false);
   const dispatch = useDispatch();
-  const [content, setContent] = useState({
-    name: "",
-  });
   const [loading, setLoading] = useState(false);
   const [inputValues, setInputValues] = useState([]);
   const [fields, setFields] = useState([]);
@@ -75,12 +55,11 @@ export default function ModalWorkoutCategory({ open, handleClose, modalWorkoutCa
         setWorkoutsCategorys(response.data);
 
         setWorkoutsCategorysArray(response.data[0].categoryItems);
-   
       } else {
         setWorkoutsCategorysArray([]);
       }
     } catch (e) {
-      console.log(e, "erro");
+      dispatch(snackBarMessageError(e.response.data.error));
     }
   }, []);
 
@@ -92,7 +71,6 @@ export default function ModalWorkoutCategory({ open, handleClose, modalWorkoutCa
     modalWorkoutCategoryRefreshRef();
   };
 
-  
   const submitCategory = async (e) => {
     setLoading(true);
 
@@ -105,8 +83,7 @@ export default function ModalWorkoutCategory({ open, handleClose, modalWorkoutCa
         { withCredentials: true }
       );
 
-      console.log(response, "response");
-      dispatch(snackBarMessageSuccess("Categorias salvas"));
+      dispatch(snackBarMessageSuccess(response.data.message));
     } catch (e) {
       dispatch(snackBarMessageError(e.response.data.error));
 
@@ -132,11 +109,9 @@ export default function ModalWorkoutCategory({ open, handleClose, modalWorkoutCa
       );
 
       console.log(response, "response");
-      dispatch(snackBarMessageSuccess("Categorias salvas"));
+      dispatch(snackBarMessageSuccess(response.data.message));
     } catch (e) {
       dispatch(snackBarMessageError(e.response.data.error));
-
-      console.log(e, "erro");
     }
     setLoading(false);
     getWorkoutCategorys();
@@ -145,23 +120,16 @@ export default function ModalWorkoutCategory({ open, handleClose, modalWorkoutCa
     refreshModalRef();
   };
 
-
-
-
-  
   const deleteCategory = async (e) => {
     const categoryItemsId = workoutsCategorys[0]._id;
-    console.log(categoryItemsId, "categoryItemsId");
-    console.log(e, "panicat");
     try {
       const response = await axiosInterceptor.delete(
         `/api/category/categorys/${categoryItemsId}/categoryItems/${e}`,
         { withCredentials: true }
       );
-      console.log(response, "resposta");
-      dispatch(snackBarMessageSuccess("Exclusão bem succedida!"));
+      dispatch(snackBarMessageSuccess(response.data.message));
     } catch (e) {
-      console.log(e, "erro");
+      dispatch(snackBarMessageError(e.response.data.error));
     }
     setLoading(false);
     getWorkoutCategorys();
@@ -293,12 +261,9 @@ export default function ModalWorkoutCategory({ open, handleClose, modalWorkoutCa
                   borderLeft: "1px solid #00000061",
                   borderBottom: "1px solid #00000061",
                   borderRight: "1px solid #00000017",
-                  
                 }}
               >
-             
                 {fields.map((item, index) => (
-        
                   <TextField
                     key={index}
                     onChange={(e) => handleChange(e, index)}
@@ -318,16 +283,15 @@ export default function ModalWorkoutCategory({ open, handleClose, modalWorkoutCa
                 ))}
 
                 {fields.length > 0 ? (
-                  <Button 
-                  sx={{position: 'relative',
-                    bottom: '30px',
-                    left: '90px'}}
-                  onClick={categoryRemove}>X</Button>
-                  
+                  <Button
+                    sx={{ position: "relative", bottom: "30px", left: "90px" }}
+                    onClick={categoryRemove}
+                  >
+                    X
+                  </Button>
                 ) : (
                   false
                 )}
-             
               </Box>
               <Box
                 sx={{
@@ -350,7 +314,6 @@ export default function ModalWorkoutCategory({ open, handleClose, modalWorkoutCa
                       justifyContent: "space-between",
                     }}
                   >
-              
                     <Typography
                       type="text"
                       required
@@ -367,7 +330,6 @@ export default function ModalWorkoutCategory({ open, handleClose, modalWorkoutCa
                     <Button onClick={() => deleteCategory(item._id)}>
                       Deletar
                     </Button>
-                 
                   </Container>
                 ))}
               </Box>

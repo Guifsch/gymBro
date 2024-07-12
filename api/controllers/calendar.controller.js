@@ -46,7 +46,7 @@ export const postCalendar = async (req, res, next) => {
       });
 
       await newCalendar.save();
-      return res.status(201).json({ message: "Calendário criado com sucesso", calendar: newCalendar });
+      return res.status(201).json({ message: "Calendário criado com sucesso" });
     } else {
       // Atualizar o calendário existente
       calendar.calendarItems = calendarItems.map(item => {

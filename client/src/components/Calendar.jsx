@@ -12,15 +12,14 @@ import {
   IconButton,
   Button,
   Modal,
-  Backdrop,
-  Fade,
 } from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
 import ptBrLocale from "@fullcalendar/core/locales/pt-br";
 import { TextField } from "@mui/material";
+import ImageWithPlaceholder from "../utils/imagePlaceHolderUntilLoad";
 import axiosConfig from "../utils/axios";
 import CardMedia from "@mui/material/CardMedia";
-import { useSelector, useDispatch } from "react-redux";
+import { useDispatch } from "react-redux";
 import {
   snackBarMessageSuccess,
   snackBarMessageError,
@@ -34,14 +33,14 @@ const style = {
   left: "50%",
   padding: "20px",
   transform: "translate(-50%, -50%)",
-  maxHeight: "800px",
   borderRadius: "2%",
   overflow: "overlay",
   bgcolor: "background.paper",
   border: "2px solid #000",
   boxShadow: 24,
-  width: "100%",
+  minWidth: "500px",
   maxWidth: "1000px",
+  maxHeight: "800px",
 };
 
 const Calendar = ({ sets }) => {
@@ -52,6 +51,8 @@ const Calendar = ({ sets }) => {
   const [calendarEvents, setCalendarEvents] = useState([]);
   const [selectedEvent, setSelectedEvent] = useState(null);
   const [draggableShowContent, setDraggableShowContent] = useState(null);
+  const [draggableShowContentBack, setDraggableShowContentBack] =
+    useState(null);
   const [selectedEventBack, setSelectedEventBack] = useState(null);
   const [image, setImage] = useState(undefined);
   const [openModal, setOpenModal] = useState(false);
@@ -170,6 +171,7 @@ const Calendar = ({ sets }) => {
 
   const handleDraggableShowContent = (info) => {
     setDraggableShowContent(info);
+    setDraggableShowContentBack(info);
     setOpenModal(true);
   };
 
@@ -188,14 +190,17 @@ const Calendar = ({ sets }) => {
     setSelectedEventBack(null);
     setSelectedEvent(null);
     setDraggableShowContent(null);
+    setDraggableShowContentBack(null);
   };
 
   const handleGoBack = () => {
     setImage(undefined);
     setSelectedEvent(selectedEventBack);
+    setDraggableShowContent(draggableShowContentBack);
   };
 
   const handleSetImage = (e) => {
+    setDraggableShowContent(null);
     setSelectedEventBack(selectedEvent);
     setSelectedEvent(null);
     setImage(e);
@@ -303,7 +308,7 @@ const Calendar = ({ sets }) => {
                 sx={{
                   display: "flex",
                   justifyContent: "center",
-                  fontWeight: "bold",
+                  fontWeight: "bold"
                 }}
               >
                 {event.name}
@@ -335,6 +340,9 @@ const Calendar = ({ sets }) => {
           />
         </Box>
       </Box>
+
+      {/* Itens da esquerda do Draggable objects */}
+
       <Modal
         aria-labelledby="transition-modal-title"
         aria-describedby="transition-modal-description"
@@ -383,24 +391,28 @@ const Calendar = ({ sets }) => {
               )}
               {draggableShowContent && (
                 <>
-                  <Typography variant="h4" gutterBottom>
+                  <Typography variant="h4" gutterBottom sx={{paddingTop: '30px'}}>
                     <b>{draggableShowContent.name}</b>
                   </Typography>
 
-                  <TextField
-                    id="comment"
-                    label="Comentário"
-                    multiline
-                    type="comment"
-                    value={draggableShowContent.comment}
-                    maxRows={4}
-                    sx={{
-                      "& > div": { height: "100px" },
-                      "& > label": { fontWeight: "bold", paddingX: "25px" },
-                      width: "100%",
-                      paddingX: "2%",
-                    }}
-                  />
+                  {draggableShowContent.comment !== "" ? (
+                    <TextField
+                      id="comment"
+                      label="Comentário"
+                      multiline
+                      type="comment"
+                      value={draggableShowContent.comment}
+                      maxRows={4}
+                      sx={{
+                        "& > div": { height: "100px" },
+                        "& > label": { fontWeight: "bold", paddingX: "25px" },
+                        width: "100%",
+                        paddingX: "2%",
+                      }}
+                    />
+                  ) : (
+                    <div>teste</div>
+                  )}
 
                   {/* Agrupe os itens por categoria */}
                   {Object.entries(
@@ -478,23 +490,32 @@ const Calendar = ({ sets }) => {
                               }}
                             />
 
-                            <TextField
-                              value={item.comment}
-                              label="Comentário"
-                              autoComplete="on"
-                              sx={{
-                                marginY: "3%",
-                                "& > label": { fontWeight: "bold" },
-                              }}
-                            />
-                            <Button
-                              onClick={() => {
-                                handleSetImage(item.exercisePicture);
-                              }}
-                              variant="contained"
-                            >
-                              <b>Imagem</b>
-                            </Button>
+                            {item.comment ? (
+                              <TextField
+                                value={item.comment}
+                                label="Comentário"
+                                autoComplete="on"
+                                sx={{
+                                  marginY: "3%",
+                                  "& > label": { fontWeight: "bold" },
+                                }}
+                              />
+                            ) : (
+                              false
+                            )}
+
+                            {item.exercisePicture ? (
+                              <Button
+                                onClick={() => {
+                                  handleSetImage(item.exercisePicture);
+                                }}
+                                variant="contained"
+                              >
+                                <b>Imagem</b>
+                              </Button>
+                            ) : (
+                              false
+                            )}
                           </Box>
                         ))}
                       </Box>
@@ -504,6 +525,7 @@ const Calendar = ({ sets }) => {
               )}
             </Box>
           ) : (
+            // Itens do calendário
             <Box
               sx={{
                 display: "flex",
@@ -514,22 +536,18 @@ const Calendar = ({ sets }) => {
               {image && (
                 <>
                   <Button onClick={handleGoBack}>Voltar</Button>
-                  <CardMedia
-                    component="img"
-                    sx={{
-                      objectFit: "contain",
-                      maxHeight: "500px",
-                      maxWidth: "500px",
-                      height: "100%",
-                      width: "100%",
-                    }}
-                    image={image}
+
+                  <ImageWithPlaceholder
+                    src={image}
+                    alt="Imagem do treino"
+                    width="500px"
+                    height="500px"
                   />
                 </>
               )}
               {selectedEvent && (
                 <>
-                  <Typography variant="h4" gutterBottom>
+                  <Typography variant="h4" gutterBottom sx={{paddingTop: '30px'}}>
                     <b>{selectedEvent.extendedProps.name}</b>
                   </Typography>
                   <Button
@@ -540,20 +558,25 @@ const Calendar = ({ sets }) => {
                   >
                     Excluir Set
                   </Button>
-                  <TextField
-                    id="comment"
-                    label="Comentário"
-                    multiline
-                    type="comment"
-                    value={selectedEvent.extendedProps.comment}
-                    maxRows={4}
-                    sx={{
-                      "& > div": { height: "100px" },
-                      "& > label": { fontWeight: "bold", paddingX: "25px" },
-                      width: "100%",
-                      paddingX: "2%",
-                    }}
-                  />
+
+                  {selectedEvent.extendedProps.comment !== "" ? (
+                    <TextField
+                      id="comment"
+                      label="Comentário"
+                      multiline
+                      type="comment"
+                      value={selectedEvent.extendedProps.comment}
+                      maxRows={4}
+                      sx={{
+                        "& > div": { height: "100px" },
+                        "& > label": { fontWeight: "bold", paddingX: "25px" },
+                        width: "100%",
+                        paddingX: "2%",
+                      }}
+                    />
+                  ) : (
+                    false
+                  )}
 
                   {/* Agrupe os itens por categoria */}
                   {Object.entries(
@@ -634,23 +657,32 @@ const Calendar = ({ sets }) => {
                               }}
                             />
 
-                            <TextField
-                              value={item.comment}
-                              label="Comentário"
-                              autoComplete="on"
-                              sx={{
-                                marginY: "3%",
-                                "& > label": { fontWeight: "bold" },
-                              }}
-                            />
-                            <Button
-                              onClick={() => {
-                                handleSetImage(item.exercisePicture);
-                              }}
-                              variant="contained"
-                            >
-                              <b>Imagem</b>
-                            </Button>
+                            {item.comment ? (
+                              <TextField
+                                value={item.comment}
+                                label="Comentário"
+                                autoComplete="on"
+                                sx={{
+                                  marginY: "3%",
+                                  "& > label": { fontWeight: "bold" },
+                                }}
+                              />
+                            ) : (
+                              false
+                            )}
+
+                            {item.exercisePicture ? (
+                              <Button
+                                onClick={() => {
+                                  handleSetImage(item.exercisePicture);
+                                }}
+                                variant="contained"
+                              >
+                                <b>Imagem</b>
+                              </Button>
+                            ) : (
+                              false
+                            )}
                           </Box>
                         ))}
                       </Box>

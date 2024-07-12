@@ -31,7 +31,6 @@ const workoutSchema = new mongoose.Schema({
   category: [categorySchema],
   exercisePicture: {
     type: String,
-    required: true,
   },
   comment: {
     type: String,

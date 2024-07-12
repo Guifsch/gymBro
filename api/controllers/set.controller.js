@@ -4,7 +4,6 @@ import Set from "../models/set.model.js";
 import { errorHandler } from "../utils/error.js";
 
 export const postSet = async (req, res, next) => {
-  console.log(req.user, "req.userreq.user")
   const userId = req.user.id
   const { name, comment, selectedItems } = req.body;
 
@@ -16,27 +15,14 @@ export const postSet = async (req, res, next) => {
   });
 
   try {
-    // const workouts = await Workout.find({ _id: { $in: selectedItems } });
-
-    // if (workouts.length !== selectedItems.length) {
-    //   return next(
-    //     errorHandler(400, "Um ou mais IDs de exercícios são inválidos!")
-    //   );
-    // }
-
-   
-
     await newSet.save();
     res
       .status(201)
       .json({ message: "Grupo criado com sucesso", group: newSet });
   } catch (error) {
-    // if (error._message.includes("Set validation failed")){
-    //   return next(
-    //     errorHandler(400, "Por favor preencha todos os campos obrigatórios!")
-    //   );
-    // }
-    next(error);
+    next(
+      errorHandler(400, "Oops, algo deu errado!")
+    );
   }
 };
 
@@ -46,7 +32,9 @@ export const getSet = async (req, res, next) => {
     const groups = await Set.find({ userId }).populate("selectedItems");
     res.status(200).json(groups);
   } catch (error) {
-    next(error);
+    next(
+      errorHandler(400, "Oops, algo deu errado!")
+    );
   }
 };
 
@@ -88,14 +76,16 @@ export const updateSet = async (req, res, next) => {
 
     res
       .status(200)
-      .json({ message: "Grupo atualizado com sucesso", group: updatedSet });
+      .json({ message: "Set atualizado com sucesso" });
   } catch (error) {
     if (error._message && error._message.includes("Validation failed")) {
       return next(
         errorHandler(400, "Por favor preencha todos os campos obrigatórios!")
       );
     }
-    next(error);
+    next(
+      errorHandler(400, "Oops, algo deu errado!")
+    );
   }
 };
 
@@ -104,9 +94,11 @@ export const deleteSets = async (req, res, next) => {
 
   try {
     await Set.findByIdAndDelete(id);
-    res.status(200).json("Set deletado com sucesso!");
+    res.status(200).json({ message: "Set deletado com sucesso!"});
   } catch (error) {
-    next(error);
+    next(
+      errorHandler(400, "Oops, algo deu errado!")
+    );
 
   }
 };

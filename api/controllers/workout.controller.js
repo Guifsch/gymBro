@@ -1,7 +1,5 @@
 import Workout from "../models/workout.model.js";
 
-
-
 import { errorHandler } from "../utils/error.js";
 
 // export const getWorkout = async (req, res, next) => {
@@ -12,37 +10,47 @@ import { errorHandler } from "../utils/error.js";
 // };
 
 export const postWorkouts = async (req, res, next) => {
-  console.log(req.user.id, "userId")
+  const { name, rep, weight, serie, category, comment, exercisePicture } = req.body;
+  if (!category) {
+    return next(
+      errorHandler(400, "Por favor preencha todos os campos obrigatórios!")
+    );
+  }
   const newWorkout = new Workout({
-    ...req.body,
+    name,
+    rep,
+    weight,
+    serie,
+    category,
+    exercisePicture,
+    comment,
     userId: req.user.id,
   });
+
   try {
-    const saveNewWorkout = await newWorkout.save();
-    res.status(201).json(saveNewWorkout);
+   await newWorkout.save();
+    return res.status(201).json({ message: "Treino salvo" });
   } catch (error) {
-    if (error._message.includes("Workout validation failed")){
+    if (error._message.includes("Workout validation failed")) {
       return next(
         errorHandler(400, "Por favor preencha todos os campos obrigatórios!")
       );
     }
-    next(error);
+    next(errorHandler(400, "Oops, algo deu errado!"));
   }
 };
 
 export const deleteWorkouts = async (req, res, next) => {
-  const id  = req.params.id;
+  const id = req.params.id;
   // erro esquisto que se tu colocar o id do usuario da successo no delete mas n deleta nada
 
   try {
     await Workout.findByIdAndDelete(id);
-    res.status(200).json("Imagem deletada com successo!");
+    res.status(200).send({ message: "Exclusão bem succedida!" });
   } catch (error) {
-    next(error);
-
+    next(errorHandler(400, "Oops, algo deu errado!"));
   }
 };
-
 
 export const getWorkouts = async (req, res, next) => {
   const userId = req.user.id;
@@ -54,15 +62,13 @@ export const getWorkouts = async (req, res, next) => {
       workouts,
     });
   } catch (error) {
-    next(error);
+    next(errorHandler(400, "Oops, algo deu errado!"));
   }
 };
 
-
 export const updateWorkouts = async (req, res, next) => {
-  console.log(req.params.id)
+  console.log(req.params.id);
   try {
-
     const updatedWorkout = await Workout.findByIdAndUpdate(
       req.params.id,
       {
@@ -72,18 +78,15 @@ export const updateWorkouts = async (req, res, next) => {
           weight: req.body.weight,
           serie: req.body.serie,
           exercisePicture: req.body.exercisePicture,
-          category: req.body.category
-          ,
+          category: req.body.category,
         },
       },
-      { new: true,
-        runValidators: true 
-       }
+      { new: true, runValidators: true }
     );
 
     res.status(200).json(updatedWorkout);
   } catch (error) {
-    if (error._message.includes("Validation failed")){
+    if (error._message.includes("Validation failed")) {
       return next(
         errorHandler(400, "Por favor preencha todos os campos obrigatórios!")
       );
