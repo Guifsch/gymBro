@@ -3,6 +3,7 @@ import { createSlice } from "@reduxjs/toolkit";
 const initialState = {
   currentUser: null,
   header: false,
+  snackBarMessageLogout: false
 };
 
 const userSlice = createSlice({
@@ -18,6 +19,7 @@ const userSlice = createSlice({
     signInSuccess: (state, action) => {
       state.currentUser = action.payload;
       state.header = true;
+      state.snackBarMessageLogout = false
     },
     //update usuário
     updateUserSuccess: (state, action) => {
@@ -31,6 +33,7 @@ const userSlice = createSlice({
     },
     signOut: (state) => {
       state.currentUser = null;
+      state.snackBarMessageLogout = true
     },
   },
 });

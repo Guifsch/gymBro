@@ -17,13 +17,14 @@ import {
   CardMedia,
 } from "@mui/material";
 
+import gymBroLogoSvg from "../assets/icons/arm-logo-svg.svg";
 import Loading from "../components/Loading";
 import { useDispatch } from "react-redux";
 import { loadingTrue, loadingFalse } from "../redux/loading/loadingSlice";
 
 import AccountCircle from "@mui/icons-material/AccountCircle";
 import LockIcon from "@mui/icons-material/Lock";
-import backgroundImage from "../assets/login_background_images/background-login-image.jpeg";
+import backgroundImage from "../assets/login_background_images/gym_background.jpg";
 function Signin() {
   const [formData, setFormData] = useState({});
   const dispatch = useDispatch();
@@ -43,25 +44,27 @@ function Signin() {
         formData,
         { withCredentials: true }
       );
+      console.log(response.data, "RESPONSE DATA ");
       dispatch(signInSuccess(response.data)); //loading, error para false e o envio do action.payload vindo do userSlice
       dispatch(
         snackBarMessageSuccess("Bem vindo " + response.data.username + "!")
       );
       history("/");
     } catch (error) {
+      dispatch(loadingFalse());
+      console.log(error, "ERROR");
       dispatch(snackBarMessageError(error.response.data.error));
     }
     dispatch(loadingFalse());
   };
 
   return (
-    <Box className="flex justify-center items-center h-screen bg-slate-200">
-      <Loading top="0"/>
+    <Box className="flex justify-center items-center h-screen">
+      <Loading top="0" />
       <CardMedia
-        className=""
         sx={{
-          width: 1,
-          height: 1,
+          width: "100%",
+          height: "100vh",
           position: "absolute",
           filter: "contrast(0.3)",
         }}
@@ -70,8 +73,6 @@ function Signin() {
         alt="Background-image"
       />
       <Box
-        height={600}
-        width={450}
         display="flex"
         alignItems="center"
         justifyContent="start"
@@ -82,10 +83,28 @@ function Signin() {
           backgroundColor: "white",
           pt: 6,
           zIndex: 1,
+          margin: "25px",
           boxShadow: "5px 5px 15px 1px",
           borderRadius: "5%",
+          width: "450px",
+          height: "650px",
+          "@media (max-width:600px)": {
+            width: "100%",
+            height: "650px", // Ajuste para telas menores
+          },
         }}
       >
+        <CardMedia
+          sx={{
+            my: 3,
+            width: "3em",
+            height: "3em",
+            display: "inline-block",
+            fontSize: "1.5rem",
+          }}
+          component="img"
+          image={gymBroLogoSvg}
+        />
         <Typography variant="h4" textAlign="center">
           Bem vindo!
         </Typography>
@@ -138,18 +157,25 @@ function Signin() {
           </Box>
         </Container>
 
-        <div className="flex items-center justify-center mb-5 mt-10 w-full">
-          <div className="text-sm font-medium text-gray-900 dark:text-gray-300">
-            Você não possui uma conta?
-            <Link to="/sign-up" className="text-blue-500 ml-1">
-              Registre-se!
-            </Link>
-          </div>
-        </div>
+        <Box
+          className="text-sm font-medium text-gray-900 dark:text-gray-300
+          "
+          sx={{
+            display: "flex",
+            marginTop: "50px",
+            flexDirection: "column",
+            alignItems: "center",
+          }}
+        >
+          Você não possui uma conta?
+          <Link to="/sign-up" className="text-blue-500 ml-1">
+            Registre-se!
+          </Link>
+        </Box>
+
         <Button
           sx={{
-            mb: 3,
-            mt: 3,
+            my: 5,
           }}
           variant="contained"
           type="submit"

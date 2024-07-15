@@ -27,6 +27,13 @@ export const updateUser = async (req, res, next) => {
       errorHandler(401, "Você só pode atualizar a sua própria conta!")
     ); //verifica se a pessoa que está querendo atualizar o perfil é realmente a dona do perfil
   }
+
+  if (!req.body.username || !req.body.email || !req.body.profilePicture)
+  {
+    return next(
+      errorHandler(401, "Por favor preencha todos os campos obrigatórios!")
+    ); 
+  }
   try {
     if (req.body.password) {
       req.body.password = bcryptjs.hashSync(req.body.password, 10);
@@ -42,12 +49,14 @@ export const updateUser = async (req, res, next) => {
           profilePicture: req.body.profilePicture,
         },
       },
-      { new: true }
+      { new: true, runValidators: true  }
     );
     const { password, ...resto } = updatedUser._doc;
     res.status(200).json(resto);
   } catch (error) {
-    next(error);
+    next(
+      errorHandler(400, "Oops, algo deu errado!")
+    );
   }
 };
 

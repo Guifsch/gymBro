@@ -50,7 +50,7 @@ export default function Workouts() {
     weight: "",
     exercisePicture: "",
     comment: "",
-    category: "",
+    category: [],
   });
   const [workouts, setWorkouts] = useState([]);
   const [getWorkoutRefUpdate, setGetWorkoutRefUpdate] = useState(1);
@@ -233,7 +233,6 @@ export default function Workouts() {
 
   const handleDeleteExercisePicture = async (e) => {
     dispatch(loadingTrue());
-    console.log(e, "gustavo");
 
     try {
       await removeImageFirebase(e.exercisePicture);
@@ -279,7 +278,7 @@ export default function Workouts() {
       weight: "",
       comment: "",
       exercisePicture: "",
-      category: "",
+      category: [],
     });
     setImageTableShow(undefined);
   };
@@ -308,12 +307,28 @@ export default function Workouts() {
       <Loading top="64px" />
       <TabContext value={valueTab}>
         <Box sx={{ borderBottom: 1, borderColor: "divider", marginTop: 5 }}>
-          <TabList onChange={handleChangeTab} aria-label="lab API tabs example">
-            <Tab label="Registrar Exercícios" value="1" />
-            <Tab label="Registrar Treinos" value="2" />
+          <TabList onChange={handleChangeTab} aria-label="Workouts">
+            <Tab
+              label="Registrar Exercícios"
+              value="1"
+              sx={{
+                "@media (max-width:600px)": {
+                  fontSize: "0.7rem",
+                },
+              }}
+            />
+            <Tab
+              label="Registrar Treinos"
+              value="2"
+              sx={{
+                "@media (max-width:600px)": {
+                  fontSize: "0.7rem",
+                },
+              }}
+            />
           </TabList>
         </Box>
-        <TabPanel value="1">
+        <TabPanel value="1" sx={{ width: "100%" }}>
           <Container
             sx={{
               display: "flex",
@@ -329,7 +344,15 @@ export default function Workouts() {
               }}
               onClick={handleOpenWorkoutModal}
             >
-              <Typography variant="h7" textAlign="center">
+              <Typography
+                variant="h7"
+                textAlign="center"
+                sx={{
+                  "@media (max-width:600px)": {
+                    fontSize: "0.7rem",
+                  },
+                }}
+              >
                 Enviar Treino
               </Typography>
             </Button>
@@ -342,7 +365,15 @@ export default function Workouts() {
               }}
               onClick={handleOpenCategoryModal}
             >
-              <Typography variant="h7" textAlign="center">
+              <Typography
+                variant="h7"
+                textAlign="center"
+                sx={{
+                  "@media (max-width:600px)": {
+                    fontSize: "0.7rem",
+                  },
+                }}
+              >
                 Criar categorias
               </Typography>
             </Button>

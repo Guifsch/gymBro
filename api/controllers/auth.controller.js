@@ -45,7 +45,9 @@ export const signin = async (req, res, next) => {
       .status(200)
       .json(resto);
   } catch (error) {
-    next(error);
+    next(
+      errorHandler(400, "Oops, algo deu errado!")
+    );
   }
 };
 
@@ -86,10 +88,19 @@ export const google = async (req, res, next) => {
         .json(resto);
     }
   } catch (error) {
-    next(error);
+    next(
+      errorHandler(400, "Oops, algo deu errado!")
+    );
   }
 };
 
 export const signout = (req, res) => {
-  res.clearCookie("access_token").status(200).json("Signout success!");
+  try {
+    res.clearCookie("access_token").status(200).json({message: "Desconectado com sucesso!"});
+  } catch (error) {
+    next(
+      errorHandler(400, "Oops, algo deu errado!")
+    );
+  }
+
 };

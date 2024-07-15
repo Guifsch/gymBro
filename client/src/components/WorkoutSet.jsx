@@ -4,11 +4,12 @@ import {
   snackBarMessageSuccess,
   snackBarMessageError,
 } from "../redux/snackbar/snackBarSlice";
-import { Container, Box, Typography, Button  } from "@mui/material";
-import Loading from "./Loading";
+import { Container, Box, Typography, Button} from "@mui/material";
 import { useDispatch } from "react-redux";
 import React, { useCallback, useState, useEffect } from "react";
 import axiosConfig from "../utils/axios";
+import { loadingTrue, loadingFalse } from "../redux/loading/loadingSlice";
+import Loading from "./Loading"
 
 export default function Workouts() {
   const axiosInterceptor = axiosConfig();
@@ -20,7 +21,6 @@ export default function Workouts() {
     selectedItems: [],
   });
   const [sets, setSets] = useState([]);
-  const [loading, setLoading] = useState(false);
   const getSets = useCallback(async () => {
     try {
       const response = await axiosInterceptor.get(`/api/set/sets`, {
@@ -32,8 +32,9 @@ export default function Workouts() {
       dispatch(snackBarMessageError(e.response.data.error));
     }
   }, []);
-
+  
   const deleteSet = async (e) => {
+    dispatch(loadingTrue());
     try {
       const response = await axiosInterceptor.delete(
         `/api/set/delete/${e._id}`,
@@ -44,9 +45,9 @@ export default function Workouts() {
       dispatch(snackBarMessageError(e.response.data.error));
     }
     getSets();
+    dispatch(loadingFalse());
   };
 
-  // useEffect para buscar os exercícios quando o componente é montado
   useEffect(() => {
     getSets();
   }, [getSets]);
@@ -71,7 +72,7 @@ export default function Workouts() {
 
   return (
     <Box className="flex flex-col justify-initial items-center">
-      <Loading />
+  
       <Button variant="contained" onClick={handleOpenSerieModal}>
         <Typography variant="h7" textAlign="center">
           Enviar Set

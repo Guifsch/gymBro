@@ -30,6 +30,10 @@ const style = {
   border: "2px solid #000",
   boxShadow: 24,
   overflow: "overlay",
+  "@media (max-width:600px)": {
+    width: "350px",
+    maxHeight: "520px",
+  },
 };
 
 export default function ModalWorkoutCategory({
@@ -107,8 +111,6 @@ export default function ModalWorkoutCategory({
         request,
         { withCredentials: true }
       );
-
-      console.log(response, "response");
       dispatch(snackBarMessageSuccess(response.data.message));
     } catch (e) {
       dispatch(snackBarMessageError(e.response.data.error));
@@ -121,6 +123,7 @@ export default function ModalWorkoutCategory({
   };
 
   const deleteCategory = async (e) => {
+    setLoading(true);
     const categoryItemsId = workoutsCategorys[0]._id;
     try {
       const response = await axiosInterceptor.delete(
@@ -248,6 +251,10 @@ export default function ModalWorkoutCategory({
                 justifyContent: "space-around",
                 paddingTop: "50px",
                 flexDirection: "row",
+                "@media (max-width:600px)": {
+                  flexDirection: "column",
+                  alignItems: "center",
+                },
               }}
             >
               <Box
@@ -261,6 +268,15 @@ export default function ModalWorkoutCategory({
                   borderLeft: "1px solid #00000061",
                   borderBottom: "1px solid #00000061",
                   borderRight: "1px solid #00000017",
+                  "@media (max-width:600px)": {
+                    alignItems: "initial",
+                    minHeight: "125px",
+                    minWidth: "230px",
+                    borderTop: "1px solid #00000061",
+                    borderLeft: "1px solid #00000061",
+                    borderBottom: "1px solid #00000017",
+                    borderRight: "1px solid #00000061",
+                  },
                 }}
               >
                 {fields.map((item, index) => (
@@ -277,6 +293,10 @@ export default function ModalWorkoutCategory({
                       width: "50%",
                       marginRight: "5%",
                       marginTop: "10px",
+                      "@media (max-width:600px)": {
+                        marginRight: "0",
+                        marginLeft: "16px",
+                      },
                     }}
                     value={inputValues[index] || ""}
                   />
@@ -284,7 +304,15 @@ export default function ModalWorkoutCategory({
 
                 {fields.length > 0 ? (
                   <Button
-                    sx={{ position: "relative", bottom: "30px", left: "90px" }}
+                    sx={{
+                      position: "relative",
+                      bottom: "30px",
+                      left: "90px",
+                      "@media (max-width:600px)": {
+                        left: "130px",
+                        width: "20px",
+                      },
+                    }}
                     onClick={categoryRemove}
                   >
                     X
@@ -303,6 +331,15 @@ export default function ModalWorkoutCategory({
                   borderTop: "1px solid #00000061",
                   borderRight: "1px solid #00000061 ",
                   borderBottom: "1px solid #00000061",
+
+                  "@media (max-width:600px)": {
+                    minHeight: "125px",
+                    minWidth: "230px",
+                    borderTop: "1px solid #00000017",
+                    borderLeft: "1px solid #00000061",
+                    borderBottom: "1px solid #00000061",
+                    borderRight: "1px solid #00000061",
+                  },
                 }}
               >
                 {workoutsCategorysArray.map((item, index) => (
@@ -339,7 +376,7 @@ export default function ModalWorkoutCategory({
           {workoutsCategorysArray.length > 0 ? (
             <Button
               sx={{
-                mt: 5,
+                my: 5,
               }}
               variant="contained"
               type="submit"

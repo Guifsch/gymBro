@@ -7,7 +7,7 @@ const ImageWithPlaceholder = ({
   alt,
   width,
   height,
-  paddingTop,
+  marginTop,
   borderRadius,
 }) => {
   const [loaded, setLoaded] = useState(false);
@@ -22,7 +22,7 @@ const ImageWithPlaceholder = ({
         width,
         height,
         position: "relative",
-        paddingTop,
+        marginTop,
         "& > img ": {
           borderRadius,
         },

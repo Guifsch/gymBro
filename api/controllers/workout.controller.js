@@ -10,7 +10,8 @@ import { errorHandler } from "../utils/error.js";
 // };
 
 export const postWorkouts = async (req, res, next) => {
-  const { name, rep, weight, serie, category, comment, exercisePicture } = req.body;
+  const { name, rep, weight, serie, category, comment, exercisePicture } =
+    req.body;
   if (!category) {
     return next(
       errorHandler(400, "Por favor preencha todos os campos obrigatórios!")
@@ -28,7 +29,7 @@ export const postWorkouts = async (req, res, next) => {
   });
 
   try {
-   await newWorkout.save();
+    await newWorkout.save();
     return res.status(201).json({ message: "Treino salvo" });
   } catch (error) {
     if (error._message.includes("Workout validation failed")) {
@@ -69,7 +70,7 @@ export const getWorkouts = async (req, res, next) => {
 export const updateWorkouts = async (req, res, next) => {
   console.log(req.params.id);
   try {
-    const updatedWorkout = await Workout.findByIdAndUpdate(
+    await Workout.findByIdAndUpdate(
       req.params.id,
       {
         $set: {
@@ -84,13 +85,14 @@ export const updateWorkouts = async (req, res, next) => {
       { new: true, runValidators: true }
     );
 
-    res.status(200).json(updatedWorkout);
+    return res.status(200).json({ message: "Atualização completa" });
   } catch (error) {
     if (error._message.includes("Validation failed")) {
       return next(
         errorHandler(400, "Por favor preencha todos os campos obrigatórios!")
       );
+    } else {
+      next(errorHandler(400, "Oops, algo deu errado!"));
     }
-    next(error, "error");
   }
 };

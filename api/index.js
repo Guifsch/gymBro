@@ -27,7 +27,7 @@ const app = express();
 const corsOptions = {
   //configuração do cors pra não dar o erro cors e o cookie ser setado do backend de forma correta no cookies do applications usando o axios
   //To allow requests from client
-  origin: ["http://localhost:5173"],
+  origin: ["http://localhost:5173", "http://192.168.15.7:5173"],
   credentials: true,
   exposedHeaders: ["set-cookie"],
 };

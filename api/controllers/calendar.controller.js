@@ -1,35 +1,6 @@
 import Calendar from "../models/calendar.model.js";
 import { errorHandler } from "../utils/error.js";
 
-// export const postCalendar = async (req, res, next) => {
-//   const userId = req.user.id
-//   const { name, start,comment, selectedItems } = req.body;
-  
-
-//   const newCalendar = new Calendar({
-//     name,
-//     userId,
-//     start,
-//     comment,
-//     selectedItems: selectedItems,
-//   });
-
-//   try {
-
-//     await newCalendar.save();
-//     res
-//       .status(201)
-//       .json({ message: "Grupo criado com sucesso" });
-//   } catch (error) {
-//     // if (error._message.includes("Set validation failed")){
-//     //   return next(
-//     //     errorHandler(400, "Por favor preencha todos os campos obrigatórios!")
-//     //   );
-//     // }
-//     next(error);
-//   }
-// };
-
 export const postCalendar = async (req, res, next) => {
   const userId = req.user.id;
   const { calendarItems } = req.body;
@@ -62,7 +33,9 @@ export const postCalendar = async (req, res, next) => {
       return res.status(200).json({ message: "Calendário atualizado com sucesso", calendar });
     }
   } catch (error) {
-    next(error);
+    next(
+      errorHandler(400, "Oops, algo deu errado!")
+    );
   }
 };
 
@@ -79,6 +52,8 @@ export const getCalendar = async (req, res, next) => {
       });
     res.status(200).json(calendar);
   } catch (error) {
-    next(error);
+    next(
+      errorHandler(400, "Oops, algo deu errado!")
+    );
   }
 };

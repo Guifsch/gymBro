@@ -12,17 +12,18 @@ import {
   Checkbox,
   ListItemText,
   TextField,
+  Container,
+  Button,
+  CircularProgress
 } from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
 import { useTheme } from "@mui/material/styles";
-import Button from "@mui/material/Button";
 import {
   snackBarMessageSuccess,
   snackBarMessageError,
 } from "../redux/snackbar/snackBarSlice";
-import { Container } from "@mui/material";
 import axiosConfig from "../utils/axios";
-import { useSelector, useDispatch } from "react-redux";
+import { useDispatch } from "react-redux";
 
 // Estilo do modal
 const style = {
@@ -61,9 +62,10 @@ export default function ModalWorkoutSerie({
 }) {
   const theme = useTheme(); // Hook do tema do Material-UI para usar estilos do tema
   const [selectedItems, setSelectedItems] = useState([]); // Estado para armazenar os itens selecionados
-  const [test, setTest] = useState([]); // Estado para armazenar os itens selecionados
   const [groupedWorkouts, setGroupedWorkouts] = useState({}); // Estado para armazenar os exercícios agrupados por categoria
+  const [loading, setLoading] = useState(false);
   const [formValues, setFormValues] = useState({
+    
     name: "",
     comment: "",
     selectedItems: [],
@@ -86,13 +88,10 @@ export default function ModalWorkoutSerie({
       } else {
         setSelectedItems([]);
       }
-      console.log(test, "TEST");
 
-      // setSelectedItems(modalContentUpdate.selectedItems._id);
     } catch (e) {
       console.log(e);
     }
-    console.log(modalContentUpdate, "modalContentUpdatemodalContentUpdate");
     setFormValues(modalContentUpdate);
   }, [modalContentUpdate]);
 
@@ -117,7 +116,7 @@ export default function ModalWorkoutSerie({
       setGroupedWorkouts(groupedByCategory); // Atualiza o estado com os exercícios agrupados
       console.log(workouts, "workouts");
     } catch (e) {
-      console.log(e, "erro");
+      dispatch(snackBarMessageError(e.response.data.error));
     }
   }, []);
 
@@ -158,7 +157,6 @@ export default function ModalWorkoutSerie({
   };
 
   useEffect(() => {
-    console.log(selectedItems, "selectedItems");
     setFormValues((prevValues) => ({
       ...prevValues,
       selectedItems: selectedItems,
@@ -174,8 +172,7 @@ export default function ModalWorkoutSerie({
   };
 
   const submitSet = async (e) => {
-    console.log(formValues, "selectedItems");
-
+    setLoading(true);
     try {
       const response = await axiosInterceptor.post(
         `/api/set/sets`,
@@ -187,25 +184,25 @@ export default function ModalWorkoutSerie({
       dispatch(snackBarMessageSuccess(response.data.message));
     } catch (e) {
       dispatch(snackBarMessageError(e.response.data.error));
-
-      console.log(e, "erro");
     }
     getSetsRef();
+    setLoading(false);
   };
 
   const submitSetUpdate = async () => {
+    setLoading(true);
     try {
       const response = await axiosInterceptor.post(
         `/api/set/update/${formValues._id}`,
         formValues,
         { withCredentials: true }
       );
-      console.log(response, "updateworkoutresponse");
-      dispatch(snackBarMessageSuccess("Atualização completa"));
+      dispatch(snackBarMessageSuccess(response.data.message));
     } catch (e) {
       dispatch(snackBarMessageError(e.response.data.error));
     }
     getSetsRef();
+    setLoading(false);
   };
 
   const getSetsRef = () => {
@@ -234,6 +231,33 @@ export default function ModalWorkoutSerie({
         >
           <CloseIcon fontSize="inherit" />
         </IconButton>
+        {loading ? (
+          <Box
+            sx={{
+              transition: "opacity 225ms cubic-bezier(0.4, 0, 0.2, 1) 0ms",
+              opacity: "1",
+              position: "absolute",
+              backgroundColor: "rgba(0, 0, 0, 0.5)",
+              height: "100%",
+              width: "100%",
+              left: "0",
+              top: "0",
+              zIndex: "9999",
+            }}
+          >
+            <CircularProgress
+              sx={{
+                width: "80px!important",
+                height: "80px!important",
+                position: "absolute",
+                left: "43%",
+                top: "43%",
+              }}
+            />
+          </Box>
+        ) : (
+          false
+        )}
         <Box
           sx={{
             display: "flex",

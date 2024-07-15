@@ -1,7 +1,15 @@
-import { Button, Box, TextField, Container, CardMedia, IconButton, Typography } from "@mui/material";
+import {
+  Button,
+  Box,
+  TextField,
+  Container,
+  CardMedia,
+  IconButton,
+  Typography,
+} from "@mui/material";
 import AccountCircle from "@mui/icons-material/AccountCircle";
 import LockIcon from "@mui/icons-material/Lock";
-import backgroundImage from "../assets/login_background_images/background-login-image.jpeg";
+import backgroundImage from "../assets/login_background_images/gym_background.jpg";
 import KeyboardBackspaceIcon from "@mui/icons-material/KeyboardBackspace";
 import axiosConfig from "../utils/axios";
 import React, { useState } from "react";
@@ -12,10 +20,13 @@ import { useDispatch } from "react-redux";
 import { loadingTrue, loadingFalse } from "../redux/loading/loadingSlice";
 
 import OAuth from "../components/OAuth";
-import { snackBarMessageSuccess, snackBarMessageError } from "../redux/snackbar/snackBarSlice";
+import {
+  snackBarMessageSuccess,
+  snackBarMessageError,
+} from "../redux/snackbar/snackBarSlice";
 
 function Signup() {
- const [formData, setFormData] = useState({});
+  const [formData, setFormData] = useState({});
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.id]: e.target.value });
   };
@@ -41,13 +52,13 @@ function Signup() {
   };
 
   return (
-    <Box  className="flex justify-center items-center h-screen bg-slate-200">
-       <Loading top="0"/>
+    <Box className="flex justify-center items-center h-screen bg-slate-200">
+      <Loading top="0" />
       <CardMedia
         className=""
         sx={{
-          width: 1,
-          height: 1,
+          width: "100%",
+          height: "100vh",
           position: "absolute",
           filter: "contrast(0.3)",
         }}
@@ -56,8 +67,6 @@ function Signup() {
         alt="Background-image"
       />
       <Box
-        height={600}
-        width={450}
         display="flex"
         alignItems="center"
         justifyContent="start"
@@ -68,8 +77,16 @@ function Signup() {
           backgroundColor: "white",
           pt: 6,
           zIndex: 1,
-          boxShadow: "5px 5px 15px 1px",
+          margin: '25px',
           position: "relative",
+          boxShadow: "5px 5px 15px 1px",
+          borderRadius: "5%",
+          width: '450px',
+          height: '600px',
+          '@media (max-width:600px)': {
+            width: '100%',
+            height: '550px' // Ajuste para telas menores
+      },
         }}
       >
         <IconButton
@@ -166,8 +183,7 @@ function Signup() {
 
         <Button
           sx={{
-            mb: 3,
-            mt: 3,
+            my: 5,
           }}
           variant="contained"
           type="submit"
@@ -179,7 +195,7 @@ function Signup() {
         </div>
         <OAuth></OAuth>
       </Box>
-    </Box >
+    </Box>
   );
 }
 

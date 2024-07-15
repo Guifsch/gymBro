@@ -12,13 +12,16 @@ import {
   IconButton,
   Button,
   Modal,
+  TextField,
+  CardMedia,
+  Tooltip,
 } from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
+import Loading from './Loading'
 import ptBrLocale from "@fullcalendar/core/locales/pt-br";
-import { TextField } from "@mui/material";
 import ImageWithPlaceholder from "../utils/imagePlaceHolderUntilLoad";
 import axiosConfig from "../utils/axios";
-import CardMedia from "@mui/material/CardMedia";
+import { loadingTrue, loadingFalse } from "../redux/loading/loadingSlice";
 import { useDispatch } from "react-redux";
 import {
   snackBarMessageSuccess,
@@ -65,6 +68,8 @@ const Calendar = ({ sets }) => {
     }
   }, [sets]);
 
+  // Função para lidar com a recepção de um evento
+
   const handleEventReceive = (info) => {
     const { start, extendedProps } = info.event;
     const newEvent = {
@@ -77,6 +82,7 @@ const Calendar = ({ sets }) => {
     setCalendarEvents((prevEvents) => [...prevEvents, newEvent]);
   };
 
+  // Função para lidar com a movimentação de um evento
   const handleEventDrop = (info) => {
     const updatedEvents = calendarEvents.map((event) =>
       event.id === info.event.id ? { ...event, start: info.event.start } : event
@@ -95,14 +101,13 @@ const Calendar = ({ sets }) => {
         start: new Date(event.start),
       }));
       setCalendarEvents(events);
-
-      console.log(response, "responseresponseresponseresponseresponse");
     } catch (e) {
-      console.log(e, "erro");
+      dispatch(snackBarMessageError(e.response.data.error));
     }
   }, []);
 
   const handleSaveCalendar = async () => {
+    dispatch(loadingTrue());
     let calendarItems = calendarEvents.map((event) => ({
       ...event,
       selectedItems: event.selectedItems.map((selected) => ({
@@ -117,20 +122,19 @@ const Calendar = ({ sets }) => {
         { withCredentials: true }
       );
 
-      console.log(response, "response");
       dispatch(snackBarMessageSuccess(response.data.message));
     } catch (e) {
       dispatch(snackBarMessageError(e.response.data.error));
-
-      console.log(e, "erro");
     }
     getCalendar();
+    dispatch(loadingFalse());
   };
 
   useEffect(() => {
     getCalendar();
   }, [getCalendar]);
 
+  // Configura a funcionalidade de arrastar e soltar para os eventos externos
   useEffect(() => {
     const draggableEl = document.getElementById("external-events");
     if (draggableEl && externalEvents.length > 0) {
@@ -149,6 +153,7 @@ const Calendar = ({ sets }) => {
     }
   }, [externalEvents]);
 
+  // Atualiza a data do calendário quando o mês ou ano é alterado
   useEffect(() => {
     const calendarApi = calendarRef.current?.getApi();
     if (calendarApi) {
@@ -228,14 +233,71 @@ const Calendar = ({ sets }) => {
 
   return (
     <Box sx={{ display: "flex", flexDirection: "column", p: 2, width: "100%" }}>
+
       <Box
         sx={{
           display: "flex",
-          justifyContent: "end",
+          justifyContent: "space-between",
           alignItems: "center",
-          paddingRight: "16px",
+          paddingX: "16px",
         }}
       >
+        <Box>
+        <Tooltip
+  title={
+    <React.Fragment>
+      <p><strong>Tutorial: Como Organizar Seus Treinos</strong></p>
+      <ol>
+        <li>
+          <strong>Adicionar Treino:</strong>
+          <ul>
+            <li>Vá para a seção "Adicionar Treino".</li>
+          </ul>
+        </li>
+        <li>
+          <strong>Criar Categorias:</strong>
+          <ul>
+            <li>Em seguida, acesse a opção "Criar Categorias" para criar categorias relacionadas às áreas dos músculos que serão treinadas.</li>
+          </ul>
+        </li>
+        <li>
+          <strong>Adicionar Treinos:</strong>
+          <ul>
+            <li>Depois de criar suas categorias, adicione seus treinos correspondentes a cada categoria.</li>
+          </ul>
+        </li>
+        <li>
+          <strong>Registrar Treinos:</strong>
+          <ul>
+            <li>Vá para a aba "Registrar Treinos" para montar seus sets de treino. Aqui, você pode detalhar os exercícios, repetições e séries para cada categoria de treino.</li>
+          </ul>
+        </li>
+        <li>
+          <strong>Finalizar e Retornar ao Início:</strong>
+          <ul>
+            <li>Após terminar de montar seus sets, retorne à página inicial.</li>
+          </ul>
+        </li>
+        <li>
+          <strong>Arrastar e Soltar Sets:</strong>
+          <ul>
+            <li>Por fim, arraste seus sets do canto esquerdo para as respectivas datas no calendário, organizando assim sua rotina de treinos.</li>
+          </ul>
+        </li>
+        <li>
+          <strong>Salvar:</strong>
+          <ul>
+            <li>Não se esqueça de salvar todas as suas alterações para garantir que seus treinos estejam registrados corretamente.</li>
+          </ul>
+        </li>
+      </ol>
+    </React.Fragment>
+  }
+  placement="bottom-end"
+>
+  <Button variant="contained">Instruções</Button>
+</Tooltip>
+        </Box>
         <Box>
           <Button
             variant="contained"
@@ -244,35 +306,40 @@ const Calendar = ({ sets }) => {
           >
             Salvar
           </Button>
+
+          <FormControl
+            variant="outlined"
+            margin="normal"
+            sx={{ marginLeft: "20px", marginY: 0 }}
+          >
+            <InputLabel>Mês</InputLabel>
+            <Select
+              value={currentMonth}
+              onChange={handleMonthChange}
+              label="Mês"
+            >
+              {months.map((month, index) => (
+                <MenuItem key={index} value={index}>
+                  {month}
+                </MenuItem>
+              ))}
+            </Select>
+          </FormControl>
+          <FormControl
+            variant="outlined"
+            margin="normal"
+            sx={{ marginLeft: "20px", marginY: 0 }}
+          >
+            <InputLabel>Ano</InputLabel>
+            <Select value={currentYear} onChange={handleYearChange} label="Ano">
+              {years.map((year) => (
+                <MenuItem key={year} value={year}>
+                  {year}
+                </MenuItem>
+              ))}
+            </Select>
+          </FormControl>
         </Box>
-        <FormControl
-          variant="outlined"
-          margin="normal"
-          sx={{ marginLeft: "20px", marginBottom: 0 }}
-        >
-          <InputLabel>Mês</InputLabel>
-          <Select value={currentMonth} onChange={handleMonthChange} label="Mês">
-            {months.map((month, index) => (
-              <MenuItem key={index} value={index}>
-                {month}
-              </MenuItem>
-            ))}
-          </Select>
-        </FormControl>
-        <FormControl
-          variant="outlined"
-          margin="normal"
-          sx={{ marginLeft: "20px", marginBottom: 0 }}
-        >
-          <InputLabel>Ano</InputLabel>
-          <Select value={currentYear} onChange={handleYearChange} label="Ano">
-            {years.map((year) => (
-              <MenuItem key={year} value={year}>
-                {year}
-              </MenuItem>
-            ))}
-          </Select>
-        </FormControl>
       </Box>
 
       <Box
@@ -308,7 +375,7 @@ const Calendar = ({ sets }) => {
                 sx={{
                   display: "flex",
                   justifyContent: "center",
-                  fontWeight: "bold"
+                  fontWeight: "bold",
                 }}
               >
                 {event.name}
@@ -391,7 +458,11 @@ const Calendar = ({ sets }) => {
               )}
               {draggableShowContent && (
                 <>
-                  <Typography variant="h4" gutterBottom sx={{paddingTop: '30px'}}>
+                  <Typography
+                    variant="h4"
+                    gutterBottom
+                    sx={{ paddingTop: "30px" }}
+                  >
                     <b>{draggableShowContent.name}</b>
                   </Typography>
 
@@ -547,7 +618,11 @@ const Calendar = ({ sets }) => {
               )}
               {selectedEvent && (
                 <>
-                  <Typography variant="h4" gutterBottom sx={{paddingTop: '30px'}}>
+                  <Typography
+                    variant="h4"
+                    gutterBottom
+                    sx={{ paddingTop: "30px" }}
+                  >
                     <b>{selectedEvent.extendedProps.name}</b>
                   </Typography>
                   <Button
@@ -694,10 +769,6 @@ const Calendar = ({ sets }) => {
           )}
         </Box>
       </Modal>
-      <Box mt={2}>
-        <Typography variant="h6">Eventos no Calendário:</Typography>
-        <pre>{JSON.stringify(calendarEvents, null, 2)}</pre>
-      </Box>
     </Box>
   );
 };

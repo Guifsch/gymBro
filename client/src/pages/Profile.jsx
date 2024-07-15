@@ -32,8 +32,6 @@ function Profile() {
   // --FIREBASE STORAGE--
   const [image, setImage] = useState(null);
   const [imagePreview, setImagePreviewImage] = useState(null);
-  const [imagePercent, setImagePercent] = useState(0);
-  const [imageError, setImageError] = useState(false);
   const fileRef = useRef(null);
   const [formData, setFormData] = useState({
     username: "",
@@ -103,6 +101,10 @@ function Profile() {
             },
             (error) => {
               reject(error);
+              dispatch(
+                snackBarMessageError("Formato ou tamanho incorreto da imagem!")
+              );
+              dispatch(loadingFalse());
             },
             () => {
               resolve(uploadTask.snapshot.ref);
@@ -146,8 +148,8 @@ function Profile() {
       dispatch(snackBarMessageSuccess("Atualização completa"));
       setImagePreviewImage(null);
     } catch (e) {
-      setImageError(true);
       console.log(e, "erro");
+      dispatch(loadingFalse());
     }
     getUserProfile();
     dispatch(loadingFalse());
@@ -161,7 +163,6 @@ function Profile() {
         `/api/user/delete/${currentUser._id}`,
         { withCredentials: true }
       );
-      console.log(response, "resposta");
       dispatch(deleteUserSuccess(response.data)); //loading, error para false e o envio do action.payload vindo do userSlice
     } catch (e) {
       dispatch(snackBarMessageError(e.response.data.error));
@@ -183,8 +184,6 @@ function Profile() {
     <Box className="flex justify-center items-center h-screen">
       <Loading top="64px" />
       <Box
-        height={600}
-        width={450}
         display="flex"
         alignItems="center"
         justifyContent="start"
@@ -192,12 +191,18 @@ function Profile() {
         flexDirection="column"
         component="form"
         sx={{
+          height: "600px",
+          width: "450px",
           backgroundColor: "white",
           zIndex: 1,
           boxShadow: "5px 5px 15px 1px",
           position: "relative",
           pt: 5,
           borderRadius: "5%",
+          "@media (max-width:600px)": {
+            width: "100%",
+            height: "550px", // Ajuste para telas menores
+          },
         }}
       >
         <Typography
@@ -217,6 +222,7 @@ function Profile() {
             className="boxDad"
             onClick={() => fileRef.current.click()}
             sx={{
+              cursor: "pointer",
               "&:hover > svg": {
                 visibility: "visible",
                 transition: "0.5s",
@@ -232,7 +238,7 @@ function Profile() {
               onChange={(e) => profileImage(e)}
             />
 
-            {formData.profilePicture ? (
+            {imagePreview || formData.profilePicture ? (
               <ImageWithPlaceholder
                 src={imagePreview || formData.profilePicture}
                 alt="Imagem não encontrada"
@@ -263,20 +269,6 @@ function Profile() {
             />
           </Box>
         </Box>
-        <p className="text-sm self-center">
-          {imageError ? ( // Porcentagem do progresso do upload e mensagens de erro
-            <span className="text-red-700">
-              Error uploading image (file size must be less than 2 MB)
-            </span>
-          ) : imagePercent > 0 && imagePercent < 100 ? (
-            <span className="text-slate-700">{`Uploading: ${imagePercent} %`}</span>
-          ) : imagePercent === 100 ? (
-            <span className="text-green-700">Image uploaded successfully</span>
-          ) : (
-            ""
-          )}
-        </p>
-
         <Container
           sx={{
             display: "flex",
