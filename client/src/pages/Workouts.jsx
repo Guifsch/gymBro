@@ -259,7 +259,6 @@ export default function Workouts() {
   };
 
   const handleOpenUpdate = (e) => {
-    console.log(e, "HEHE");
     setModalContentUpdate(e);
     setOpenWorkoutModal(true);
   };
@@ -328,7 +327,7 @@ export default function Workouts() {
             />
           </TabList>
         </Box>
-        <TabPanel value="1" sx={{ width: "100%" }}>
+        <TabPanel value="1" sx={{ width: "100%", maxWidth:'1200px' }}>
           <Container
             sx={{
               display: "flex",
@@ -382,7 +381,7 @@ export default function Workouts() {
             <MaterialReactTable table={table} />
           </Box>
         </TabPanel>
-        <TabPanel value="2" sx={{ width: "100%" }}>
+        <TabPanel value="2" sx={{ width: "100%", maxWidth:'1200px' }}>
           <WorkoutSet />
         </TabPanel>
       </TabContext>

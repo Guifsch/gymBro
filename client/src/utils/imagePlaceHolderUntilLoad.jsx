@@ -6,6 +6,7 @@ const ImageWithPlaceholder = ({
   src,
   alt,
   width,
+  maxWidth,
   height,
   marginTop,
   borderRadius,
@@ -21,6 +22,7 @@ const ImageWithPlaceholder = ({
       style={{
         width,
         height,
+        maxWidth,
         position: "relative",
         marginTop,
         "& > img ": {

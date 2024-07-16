@@ -17,7 +17,9 @@ export const getUser = async (req, res, next) => {
     const { password, ...resto } = user._doc;
     res.status(200).json(resto);
   } catch (error) {
-    next(error);
+    next(
+      errorHandler(400, "Oops, algo deu errado!")
+    );
   }
 };
 
@@ -68,6 +70,8 @@ export const deleteUser = async (req, res, next) => {
     await User.findByIdAndDelete(req.params.id);
     res.status(200).json("Usuário deletado com successo!");
   } catch (error) {
-    next(error);
+    next(
+      errorHandler(400, "Oops, algo deu errado!")
+    );
   }
 };

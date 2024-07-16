@@ -85,6 +85,7 @@ export default function Header() {
   let history = useNavigate();
   const theme = useTheme();
   const [open, setOpen] = React.useState(false);
+  const [profileMobileMenuOpen, setProfileMobileMenuOpen] = React.useState(false);
 
   const handleSignOut = async () => {
     try {
@@ -101,6 +102,7 @@ export default function Header() {
 
   const handleDrawerOpen = () => {
     setOpen(true);
+    
   };
 
   const handleDrawerClose = () => {

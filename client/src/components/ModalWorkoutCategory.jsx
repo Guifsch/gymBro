@@ -31,7 +31,7 @@ const style = {
   boxShadow: 24,
   overflow: "overlay",
   "@media (max-width:600px)": {
-    width: "350px",
+    width: "100%",
     maxHeight: "520px",
   },
 };
@@ -90,8 +90,6 @@ export default function ModalWorkoutCategory({
       dispatch(snackBarMessageSuccess(response.data.message));
     } catch (e) {
       dispatch(snackBarMessageError(e.response.data.error));
-
-      console.log(e, "erro");
     }
     setLoading(false);
     getWorkoutCategorys();
@@ -103,7 +101,6 @@ export default function ModalWorkoutCategory({
   const udpateCategory = async (e) => {
     setLoading(true);
     const categoryItemsId = workoutsCategorys[0]._id;
-    console.log(workoutsCategorys[0]._id);
     const request = { categoryItems: fields };
     try {
       const response = await axiosInterceptor.put(

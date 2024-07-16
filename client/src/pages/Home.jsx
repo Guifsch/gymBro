@@ -21,8 +21,7 @@ export default function Workouts() {
       setSets(response.data);
 
     } catch (e) {
-      console.log(e, "autentificaqcao error");
-      // dispatch(snackBarMessageError(error.response.data.error));
+      dispatch(snackBarMessageError(e.response.data.error));
     }
   }, []);
 
@@ -40,12 +39,13 @@ export default function Workouts() {
           display: "flex",
           justifyContent: "center",
           alignItems: "initial",
-          width: "80%",
+          width: "100%",
+          maxWidth: "1200px",
           marginTop: "40px",
         }}
       >
           <CssBaseline />
-          <Calendar sets={sets} sx={{ width: "100%" }} />
+          <Calendar sets={sets} sx={{ width: "100%"}} />
       </Box>
     </Box>
   );

@@ -2,13 +2,6 @@ import Workout from "../models/workout.model.js";
 
 import { errorHandler } from "../utils/error.js";
 
-// export const getWorkout = async (req, res, next) => {
-//   const allExercisesPhotos = await Workout.find({}).sort({
-//     createdAt: -1,
-//   });
-//   res.json(allExercisesPhotos);
-// };
-
 export const postWorkouts = async (req, res, next) => {
   const { name, rep, weight, serie, category, comment, exercisePicture } =
     req.body;
@@ -68,7 +61,7 @@ export const getWorkouts = async (req, res, next) => {
 };
 
 export const updateWorkouts = async (req, res, next) => {
-  console.log(req.params.id);
+
   try {
     await Workout.findByIdAndUpdate(
       req.params.id,

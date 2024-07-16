@@ -44,7 +44,6 @@ function Signin() {
         formData,
         { withCredentials: true }
       );
-      console.log(response.data, "RESPONSE DATA ");
       dispatch(signInSuccess(response.data)); //loading, error para false e o envio do action.payload vindo do userSlice
       dispatch(
         snackBarMessageSuccess("Bem vindo " + response.data.username + "!")
@@ -52,7 +51,6 @@ function Signin() {
       history("/");
     } catch (error) {
       dispatch(loadingFalse());
-      console.log(error, "ERROR");
       dispatch(snackBarMessageError(error.response.data.error));
     }
     dispatch(loadingFalse());
@@ -90,7 +88,8 @@ function Signin() {
           height: "650px",
           "@media (max-width:600px)": {
             width: "100%",
-            height: "650px", // Ajuste para telas menores
+            height: "600px",
+            pt: 2,
           },
         }}
       >

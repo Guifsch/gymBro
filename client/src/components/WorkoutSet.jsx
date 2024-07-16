@@ -83,7 +83,11 @@ export default function Workouts() {
           display: "flex",
           justifyContent: "center",
           paddingLeft: "18%",
-          width: '100%'
+          width: '100%',
+          "@media (max-width:1000px)": {
+            paddingLeft: 0,
+          },
+          
         }}
       >
         <Box
@@ -92,6 +96,12 @@ export default function Workouts() {
             justifyContent: "start",
             flexWrap: "wrap",
             width: "100%",
+        
+              "@media (max-width:1000px)": {
+                flexDirection: "column",
+                alignItems: 'center'
+              },
+          
           }}
         >
           {sets.map((item, index) => (
@@ -108,6 +118,9 @@ export default function Workouts() {
                 margin: "2%",
                 wordBreak: "break-word",
                 cursor: "pointer",
+                "@media (max-width:1000px)": {
+                  width: "200px",
+                },
               }}
             >
               <Button

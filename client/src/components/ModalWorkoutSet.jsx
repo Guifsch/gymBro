@@ -38,6 +38,9 @@ const style = {
   border: "2px solid #000",
   boxShadow: 24,
   overflow: "overlay",
+  "@media (max-width:600px)": {
+    width: "100%",
+  },
 };
 
 // Função para determinar o estilo de um item na lista com base na sua seleção
@@ -81,7 +84,6 @@ export default function ModalWorkoutSerie({
       ) {
         setSelectedItems(
           modalContentUpdate.selectedItems.map((e) => {
-            console.log(e, "picles");
             return e._id;
           })
         );
@@ -102,7 +104,6 @@ export default function ModalWorkoutSerie({
         withCredentials: true,
       });
       const workouts = response.data.workouts;
-      console.log(workouts, "workouts");
       // Agrupando os exercícios por categoria
       const groupedByCategory = workouts.reduce((acc, workout) => {
         const categoryName = workout.category[0].name;
@@ -114,7 +115,6 @@ export default function ModalWorkoutSerie({
       }, {});
 
       setGroupedWorkouts(groupedByCategory); // Atualiza o estado com os exercícios agrupados
-      console.log(workouts, "workouts");
     } catch (e) {
       dispatch(snackBarMessageError(e.response.data.error));
     }
@@ -125,7 +125,6 @@ export default function ModalWorkoutSerie({
   }, [getWorkout]);
 
   useEffect(() => {
-    console.log(selectedItems, "selectedItems");
     setFormValues((prevValues) => ({
       ...prevValues,
       selectedItems: selectedItems,
@@ -179,8 +178,6 @@ export default function ModalWorkoutSerie({
         formValues,
         { withCredentials: true }
       );
-
-      console.log(response, "response");
       dispatch(snackBarMessageSuccess(response.data.message));
     } catch (e) {
       dispatch(snackBarMessageError(e.response.data.error));

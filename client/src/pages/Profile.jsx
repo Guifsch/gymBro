@@ -136,7 +136,6 @@ function Profile() {
         await removeImageFirebase(formData.profilePicture);
         const imageUrl = await handleFileUpload(image);
         updatedFormData = { ...updatedFormData, profilePicture: imageUrl };
-        console.log(imageUrl, "imageUrl");
       }
 
       const response = await axiosInterceptor.post(

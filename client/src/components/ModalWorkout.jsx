@@ -37,16 +37,19 @@ const ITEM_HEIGHT = 48;
 const ITEM_PADDING_TOP = 8;
 const MenuProps = {
   PaperProps: {
-    style: {
+    sx: {
       maxHeight: ITEM_HEIGHT * 4.5 + ITEM_PADDING_TOP,
       width: 246.47,
+      "@media (max-width:800px)": {
+        width: " 100%",
+      },
     },
   },
 };
 
 const style = {
   position: "absolute",
-  width:' 100%',
+  width: " 100%",
   top: "50%",
   borderRadius: "2%",
   left: "50%",
@@ -61,7 +64,7 @@ const style = {
     maxHeight: 550,
   },
   "@media (max-width:600px)": {
-    width:' 100%',
+    width: " 100%",
   },
 };
 
@@ -100,7 +103,6 @@ export default function ModalWorkout({
       console.log(e);
     }
     setContent(modalContentUpdate);
-    console.log(modalContentUpdate, "modalContentUpdatemodalContentUpdate")
   }, [modalContentUpdate]);
 
   useEffect(() => {
@@ -220,7 +222,9 @@ export default function ModalWorkout({
             },
             (error) => {
               reject(error);
-              dispatch(snackBarMessageError("Formato ou tamanho incorreto da imagem!"));
+              dispatch(
+                snackBarMessageError("Formato ou tamanho incorreto da imagem!")
+              );
               setLoading(false);
             },
             () => {
@@ -250,7 +254,6 @@ export default function ModalWorkout({
 
       if (imagePreview) {
         const imageUrl = await handleFileUpload(image);
-        console.log(imageUrl, "imageUrl");
         updatedContent = { ...updatedContent, exercisePicture: imageUrl };
       }
 
@@ -283,17 +286,14 @@ export default function ModalWorkout({
   };
 
   const submitWorkoutUpdate = async () => {
-
     setLoading(true);
     try {
       let workoutUpdated = { ...content };
       validateInputPost(workoutUpdated, ["exercisePicture", "comment"]);
       if (imagePreview) {
         await removeImageFirebase(modalContentUpdate.exercisePicture);
-        console.log(content.profilePicture, "content.profilePicture");
         const imageUrl = await handleFileUpload(image);
         workoutUpdated = { ...workoutUpdated, exercisePicture: imageUrl };
-        console.log(imageUrl, "imageUrl");
       }
 
       const response = await axiosInterceptor.post(
@@ -303,7 +303,6 @@ export default function ModalWorkout({
       );
       dispatch(snackBarMessageSuccess(response.data.message));
     } catch (e) {
-      console.log(e)
       dispatch(snackBarMessageError(e.response.data.error));
     }
     getWorkoutRefValue();
@@ -323,337 +322,339 @@ export default function ModalWorkout({
 
   const isEmpty = (value) => {
     // Verifica se o valor é uma string vazia ou um array vazio variar o botão salvar ou atualizar
-    return (typeof value === 'string' && value === '') || (Array.isArray(value) && value.length === 0);
+    return (
+      (typeof value === "string" && value === "") ||
+      (Array.isArray(value) && value.length === 0)
+    );
   };
-  
+
   const allValuesAreEmpty = Object.values(modalContentUpdate).every(isEmpty);
 
   return (
     <Modal
-    aria-labelledby="transition-modal-title"
-    aria-describedby="transition-modal-description"
-    open={open}
-    onClose={handleClose}
-    closeAfterTransition
-    slots={{ backdrop: Backdrop }}
-    slotProps={{
-      backdrop: {
-        timeout: 500,
-        position: "relative",
-      },
-    }}
-  >
-    <Box sx={style}>
-      <IconButton
-        onClick={handleClose}
-        size="large"
-        sx={{
-          position: "absolute",
-          top: "5px",
-          right: "10px",
-          zIndex: "999",
-        }}
-        aria-label="back"
-        color="primary"
-      >
-        <CloseIcon fontSize="inherit" />
-      </IconButton>
-
-      {modalImageShow ? (
-        false
-      ) : (
-        <Typography
-          textAlign="center"
+      aria-labelledby="transition-modal-title"
+      aria-describedby="transition-modal-description"
+      open={open}
+      onClose={handleClose}
+      closeAfterTransition
+      slots={{ backdrop: Backdrop }}
+      slotProps={{
+        backdrop: {
+          timeout: 500,
+          position: "relative",
+        },
+      }}
+    >
+      <Box sx={style}>
+        <IconButton
+          onClick={handleClose}
+          size="large"
           sx={{
             position: "absolute",
-            right: "25%",
-            left: "25%",
             top: "5px",
-            fontSize: "0.8em",
-            color: "red",
+            right: "10px",
+            zIndex: "999",
           }}
+          aria-label="back"
+          color="primary"
         >
-          campos com * são obrigatórios...
-        </Typography>
-      )}
+          <CloseIcon fontSize="inherit" />
+        </IconButton>
 
-      {loading ? (
-        <Box
-          sx={{
-            transition: "opacity 225ms cubic-bezier(0.4, 0, 0.2, 1) 0ms",
-            opacity: "1",
-            position: "absolute",
-            backgroundColor: "rgba(0, 0, 0, 0.5)",
-            height: "100%",
-            width: "100%",
-            left: "0",
-            top: "0",
-            zIndex: "9999",
-          }}
-        >
-          <CircularProgress
+        {modalImageShow ? (
+          false
+        ) : (
+          <Typography
+            textAlign="center"
             sx={{
-              width: "80px!important",
-              height: "80px!important",
               position: "absolute",
-              left: "45%",
-              top: "40%",
-            }}
-          />
-        </Box>
-      ) : (
-        false
-      )}
-      {modalImageShow ? (
-        <Box
-          sx={{
-            display: "flex",
-            flexDirection: "column",
-            justifyContent: "center",
-            alignItems: "center",
-            width: "100%",
-            height: "100%",
-          }}
-        >
-          <CardMedia
-            component="img"
-            sx={{
-              objectFit: "contain",
-              maxHeight: "700px",
-              maxWidth: "700px",
-              height: "100%",
-              width: "100%",
-            }}
-            image={modalImageShow}
-          />
-        </Box>
-      ) : (
-        <Box
-          className="boxDad"
-          sx={{
-            "&:hover > svg": {
-              visibility: "visible",
-              transition: "0.5s",
-              opacity: 1,
-            },
-            display: "flex",
-            flexDirection: "column",
-            alignItems: "center",
-            
-          }}
-        >
-          <Container
-            sx={{
-              display: "flex",
-              flexWrap: "wrap",
-              justifyContent: "space-around",
-              paddingTop: "50px",
-              "@media (max-width:800px)": {
-                flexDirection: "column",
-                "& > div": {
-                  width: '100%'
-                },
-              },
+              right: "25%",
+              left: "25%",
+              top: "5px",
+              fontSize: "0.8em",
+              color: "red",
             }}
           >
-            <TextField
-              onChange={handleChange}
-              type="name"
-              required
-              id="name"
-              value={content.name}
-              label="Nome"
-              variant="standard"
-              autoComplete="on"
-              sx={{
-                "& input": {
-                  borderBottom: "2px solid black",
-                },
-                width: "26%",
-                marginRight: "5%",
-                marginTop: "5%",
-              }}
-            />
-            <TextField
-              onChange={handleChange}
-              type="rep"
-              value={content.rep}
-              required
-              id="rep"
-              label="Repetições"
-              variant="standard"
-              autoComplete="on"
-              sx={{
-                "& input": {
-                  borderBottom: "2px solid black",
-                },
-                width: "26%",
-                marginRight: "5%",
-                marginTop: "5%",
-              }}
-            />
-            <TextField
-              onChange={handleChange}
-              type="serie"
-              required
-              id="serie"
-              value={content.serie}
-              label="Series"
-              variant="standard"
-              autoComplete="on"
-              sx={{
-                "& input": {
-                  borderBottom: "2px solid black",
-                },
-                width: "26%",
-                marginRight: "5%",
-                marginTop: "5%",
-              }}
-            />
-            <TextField
-              onChange={handleChange}
-              type="weight"
-              required
-              id="weight"
-              label="Peso"
-              value={content.weight}
-              variant="standard"
-              autoComplete="on"
-              sx={{
-                "& input": {
-                  borderBottom: "2px solid black",
-                },
-                width: "26%",
-                marginRight: "5%",
-                marginTop: "3%",
-                marginTop: "5%",
-              }}
-            />
-            <Box
-              sx={{
-                width: "26%",
-                marginRight: "5%",
-                marginTop: "3%",
-                marginTop: "5%",
-              }}
-            >
-              <Box sx={{ minWidth: 80, width: "100%" }}>
-                <InputLabel
-                  sx={{ fontSize: "1rem" }}
-                  id="demo-simple-select-autowidth-label"
-                >
-                  Categoria*
-                </InputLabel>
+            campos com * são obrigatórios...
+          </Typography>
+        )}
 
-                <Select
-                  sx={{
-                    borderBottom: "2px solid black",
-                    width: "100%",
-                  }}
-                  labelId="demo-simple-select-autowidth-label"
-                  id="demo-simple-select-autowidth"
-                  value={selectedOption || ""}
-                  onChange={handleChangeCategory}
-                  variant="filled"
-                  autoWidth
-                  label="Selecione uma opção"
-                  MenuProps={MenuProps}
-                >
-                  <MenuItem value="">
-                    <em>Nenhum</em>
-                  </MenuItem>
-                  {workoutsCategorys.map((option) => (
-                    <MenuItem key={option._id} value={option._id}>
-                      {option.name}
-                    </MenuItem>
-                  ))}
-                </Select>
-              </Box>
-            </Box>
-            <TextField
-              id="comment"
-              label="Comentário"
-              multiline
-              type="comment"
-              value={content.comment || ""}
-              onChange={handleChange}
-              maxRows={4}
+        {loading ? (
+          <Box
+            sx={{
+              transition: "opacity 225ms cubic-bezier(0.4, 0, 0.2, 1) 0ms",
+              opacity: "1",
+              position: "absolute",
+              backgroundColor: "rgba(0, 0, 0, 0.5)",
+              height: "100%",
+              width: "100%",
+              left: "0",
+              top: "0",
+              zIndex: "9999",
+            }}
+          >
+            <CircularProgress
               sx={{
-                "& > div": { height: "100px" },
-                width: "26%",
-                marginTop: "3%",
-                marginRight: "5%",
-                marginTop: "5%",
+                width: "80px!important",
+                height: "80px!important",
+                position: "absolute",
+                left: "45%",
+                top: "40%",
               }}
             />
-          </Container>
-          {allValuesAreEmpty ? (
-            
-            <Button
-              sx={{
-                mt: 5,
-              }}
-              variant="contained"
-              type="submit"
-              onClick={submitWorkout}
-            >
-              Salvar
-            </Button>
-          ) : (
-            <Button
-              sx={{
-                mt: 5,
-              }}
-              variant="contained"
-              type="submit"
-              onClick={submitWorkoutUpdate}
-            >
-              Atualizar
-            </Button>
-          )}
-
-          <Container
+          </Box>
+        ) : (
+          false
+        )}
+        {modalImageShow ? (
+          <Box
             sx={{
               display: "flex",
               flexDirection: "column",
+              justifyContent: "center",
               alignItems: "center",
-              py: 5,
+              width: "100%",
+              height: "100%",
             }}
           >
-            <input
-              type="file"
-              hidden
-              accept="image/png, image/jpeg"
-              onChange={(e) => profileImage(e)}
-              ref={fileRef}
-            
+            <CardMedia
+              component="img"
+              sx={{
+                objectFit: "contain",
+                maxHeight: "700px",
+                maxWidth: "700px",
+                height: "100%",
+                width: "100%",
+              }}
+              image={modalImageShow}
             />
-            <Button variant="contained" onClick={() => fileRef.current.click()}>Escolher arquivo</Button>
-            {imagePreview || content.exercisePicture ? (
-              <ImageWithPlaceholder
-                src={imagePreview || content.exercisePicture}
-                alt="Imagem do treino"
-                width="300px"
-                height="450px"
-                marginTop="30px"
-              />
-            ) : (
-              <Typography
-                sx={{
-                  display: "flex",
+          </Box>
+        ) : (
+          <Box
+            className="boxDad"
+            sx={{
+              "&:hover > svg": {
+                visibility: "visible",
+                transition: "0.5s",
+                opacity: 1,
+              },
+              display: "flex",
+              flexDirection: "column",
+              alignItems: "center",
+            }}
+          >
+            <Container
+              sx={{
+                display: "flex",
+                flexWrap: "wrap",
+                justifyContent: "space-around",
+                paddingTop: "50px",
+                "@media (max-width:800px)": {
                   flexDirection: "column",
-                  alignItems: "center",
-                  my: 5,
+                  "& > div": {
+                    width: "100%",
+                  },
+                },
+              }}
+            >
+              <TextField
+                onChange={handleChange}
+                type="name"
+                required
+                id="name"
+                value={content.name}
+                label="Nome"
+                variant="standard"
+                autoComplete="on"
+                sx={{
+                  "& input": {
+                    borderBottom: "2px solid black",
+                  },
+                  width: "26%",
+                  marginRight: "5%",
+                  marginTop: "5%",
                 }}
-                variant="h5"
+              />
+              <TextField
+                onChange={handleChange}
+                type="rep"
+                value={content.rep}
+                required
+                id="rep"
+                label="Repetições"
+                variant="standard"
+                autoComplete="on"
+                sx={{
+                  "& input": {
+                    borderBottom: "2px solid black",
+                  },
+                  width: "26%",
+                  marginRight: "5%",
+                  marginTop: "5%",
+                }}
+              />
+              <TextField
+                onChange={handleChange}
+                type="serie"
+                required
+                id="serie"
+                value={content.serie}
+                label="Series"
+                variant="standard"
+                autoComplete="on"
+                sx={{
+                  "& input": {
+                    borderBottom: "2px solid black",
+                  },
+                  width: "26%",
+                  marginRight: "5%",
+                  marginTop: "5%",
+                }}
+              />
+              <TextField
+                onChange={handleChange}
+                type="weight"
+                required
+                id="weight"
+                label="Peso"
+                value={content.weight}
+                variant="standard"
+                autoComplete="on"
+                sx={{
+                  "& input": {
+                    borderBottom: "2px solid black",
+                  },
+                  width: "26%",
+                  marginRight: "5%",
+                  marginTop: "5%",
+                }}
+              />
+              <Box
+                sx={{
+                  width: "26%",
+                  marginRight: "5%",
+                  marginTop: "5%",
+                }}
               >
-                Selecione sua imagem*
-              </Typography>
+                <Box sx={{ minWidth: 80, width: "100%" }}>
+                  <InputLabel
+                    sx={{ fontSize: "1rem" }}
+                    id="demo-simple-select-autowidth-label"
+                  >
+                    Categoria*
+                  </InputLabel>
+
+                  <Select
+                    sx={{
+                      borderBottom: "2px solid black",
+                      width: "100%",
+                    }}
+                    labelId="demo-simple-select-autowidth-label"
+                    id="demo-simple-select-autowidth"
+                    value={selectedOption || ""}
+                    onChange={handleChangeCategory}
+                    variant="filled"
+                    autoWidth
+                    label="Selecione uma opção"
+                    MenuProps={MenuProps}
+                  >
+                    <MenuItem value="">
+                      <em>Nenhum</em>
+                    </MenuItem>
+                    {workoutsCategorys.map((option) => (
+                      <MenuItem key={option._id} value={option._id}>
+                        {option.name}
+                      </MenuItem>
+                    ))}
+                  </Select>
+                </Box>
+              </Box>
+              <TextField
+                id="comment"
+                label="Comentário"
+                multiline
+                type="comment"
+                value={content.comment || ""}
+                onChange={handleChange}
+                maxRows={4}
+                sx={{
+                  "& > div": { height: "100px" },
+                  width: "26%",
+                  marginRight: "5%",
+                  marginTop: "5%",
+                }}
+              />
+            </Container>
+            {allValuesAreEmpty ? (
+              <Button
+                sx={{
+                  mt: 5,
+                }}
+                variant="contained"
+                type="submit"
+                onClick={submitWorkout}
+              >
+                Salvar
+              </Button>
+            ) : (
+              <Button
+                sx={{
+                  mt: 5,
+                }}
+                variant="contained"
+                type="submit"
+                onClick={submitWorkoutUpdate}
+              >
+                Atualizar
+              </Button>
             )}
-          </Container>
-        </Box>
-      )}
-    </Box>
-  </Modal>
+
+            <Container
+              sx={{
+                display: "flex",
+                flexDirection: "column",
+                alignItems: "center",
+                py: 5,
+              }}
+            >
+              <input
+                type="file"
+                hidden
+                accept="image/png, image/jpeg"
+                onChange={(e) => profileImage(e)}
+                ref={fileRef}
+              />
+              <Button
+                variant="contained"
+                onClick={() => fileRef.current.click()}
+              >
+                Escolher arquivo
+              </Button>
+              {imagePreview || content.exercisePicture ? (
+                <ImageWithPlaceholder
+                  src={imagePreview || content.exercisePicture}
+                  alt="Imagem do treino"
+                  width="300px"
+                  height="450px"
+                  marginTop="30px"
+                />
+              ) : (
+                <Typography
+                  sx={{
+                    display: "flex",
+                    flexDirection: "column",
+                    alignItems: "center",
+                    my: 5,
+                  }}
+                  variant="h5"
+                >
+                  Selecione sua imagem*
+                </Typography>
+              )}
+            </Container>
+          </Box>
+        )}
+      </Box>
+    </Modal>
   );
 }
