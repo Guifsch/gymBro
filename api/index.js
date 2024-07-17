@@ -12,6 +12,8 @@ import cookieParser from "cookie-parser";
 import path from 'path';
 dotenv.config();
 
+const app = express();
+
 mongoose
   .connect(process.env.MONGO)
   .then(() => {
@@ -26,7 +28,7 @@ mongoose
 
   const __dirname = path.resolve();
 
-const app = express();
+
 
 app.use(express.static(path.join(__dirname, '/client/dist')));
 
