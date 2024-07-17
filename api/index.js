@@ -16,8 +16,8 @@ mongoose
   .connect(process.env.MONGO)
   .then(() => {
     console.log("MongoDB conectado");
-    app.listen(process.env.PORT, (req, res) => {
-      console.log(`Servidor rodando na porta: ${process.env.PORT}.`);
+    app.listen(3000, (req, res) => {
+      console.log(`Servidor rodando na porta: 3000}.`);
     });
   })
   .catch((err) => {
