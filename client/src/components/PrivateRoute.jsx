@@ -12,7 +12,7 @@ function PraviteRoute() {
   const { snackBarMessageLogout } = useSelector((state) => state.user);
   useEffect(() => {
     if (snackBarMessageLogout) {
-      //Para surgir a mensagem desconectado ao invés de você não está autentificado ao dar logout
+      //Para surgir a mensagem 'desconectado' ao invés de 'você não está autentificado' ao dar logout
       dispatch(snackBarMessageSuccess("Desconectado com sucesso!"));
     }
     else if (!currentUser) {

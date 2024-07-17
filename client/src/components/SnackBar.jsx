@@ -29,18 +29,6 @@ function SnackBar() {
 
         message={message}
         key={vertical + horizontal}
-        // action={
-        //   <React.Fragment>
-        //     <IconButton
-        //       aria-label="close"
-        //       color="inherit"
-        //       sx={{ p: 0.5 }}
-        //       onClick={handleCloseSnack}
-        //     >
-        //       <CloseIcon />
-        //     </IconButton>
-        //   </React.Fragment>
-        // }
       >
         <Alert
           onClose={handleCloseSnack}

@@ -327,7 +327,7 @@ export default function Workouts() {
             />
           </TabList>
         </Box>
-        <TabPanel value="1" sx={{ width: "100%", maxWidth:'1200px' }}>
+        <TabPanel value="1" sx={{ width: "100%", maxWidth: "1200px" }}>
           <Container
             sx={{
               display: "flex",
@@ -339,28 +339,8 @@ export default function Workouts() {
               sx={{
                 mt: 0,
                 mb: "25px",
+
                 mr: "20px",
-              }}
-              onClick={handleOpenWorkoutModal}
-            >
-              <Typography
-                variant="h7"
-                textAlign="center"
-                sx={{
-                  "@media (max-width:600px)": {
-                    fontSize: "0.7rem",
-                  },
-                }}
-              >
-                Enviar Treino
-              </Typography>
-            </Button>
-            <Button
-              variant="contained"
-              sx={{
-                mt: 0,
-                mb: "25px",
-                ml: "20px",
               }}
               onClick={handleOpenCategoryModal}
             >
@@ -376,12 +356,33 @@ export default function Workouts() {
                 Criar categorias
               </Typography>
             </Button>
+            <Button
+              variant="contained"
+              sx={{
+                mt: 0,
+                mb: "25px",
+                ml: "20px",
+              }}
+              onClick={handleOpenWorkoutModal}
+            >
+              <Typography
+                variant="h7"
+                textAlign="center"
+                sx={{
+                  "@media (max-width:600px)": {
+                    fontSize: "0.7rem",
+                  },
+                }}
+              >
+                Enviar Treino
+              </Typography>
+            </Button>
           </Container>
           <Box sx={{ pb: 10, width: "100%" }}>
             <MaterialReactTable table={table} />
           </Box>
         </TabPanel>
-        <TabPanel value="2" sx={{ width: "100%", maxWidth:'1200px' }}>
+        <TabPanel value="2" sx={{ width: "100%", maxWidth: "1200px" }}>
           <WorkoutSet />
         </TabPanel>
       </TabContext>

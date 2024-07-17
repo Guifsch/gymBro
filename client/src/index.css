@@ -68,8 +68,10 @@ html {
     border-radius: 3px;
     cursor: pointer;
     word-break: break-all;
-    overflow-y: overlay;
 
+}
+.fc-daygrid-event {
+    white-space: normal;
 }
 .fc-dayGridMonth-view {
     overflow-x: overlay;

@@ -9,7 +9,6 @@ import { useDispatch } from "react-redux";
 import React, { useCallback, useState, useEffect } from "react";
 import axiosConfig from "../utils/axios";
 import { loadingTrue, loadingFalse } from "../redux/loading/loadingSlice";
-import Loading from "./Loading"
 
 export default function Workouts() {
   const axiosInterceptor = axiosConfig();

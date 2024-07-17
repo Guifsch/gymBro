@@ -14,7 +14,7 @@ import {
   Modal,
   TextField,
   CardMedia,
-  Paper
+  Paper,
 } from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
 import ptBrLocale from "@fullcalendar/core/locales/pt-br";
@@ -186,10 +186,15 @@ const Calendar = ({ sets }) => {
     setOpenModal(true);
   };
 
-  const handleDeleteEvent = () => {
-    const updatedEvents = calendarEvents.filter(
-      (event) => event.id !== selectedEvent.id
-    );
+  const handleDeleteEvent = (e) => {
+    let updatedEvents = {};
+    if (e) {
+      updatedEvents = calendarEvents.filter((event) => event.id !== e.id);
+    } else {
+      updatedEvents = calendarEvents.filter(
+        (event) => event.id !== selectedEvent.id
+      );
+    }
     setCalendarEvents(updatedEvents);
     setSelectedEvent(null);
     setOpenModal(false);
@@ -272,130 +277,130 @@ const Calendar = ({ sets }) => {
           },
         }}
       >
-       <Box position="relative">
-      <Button
-        variant="contained"
-        onClick={() => setOpenToolTip((prev) => !prev)}
-        sx={{
-          "@media (max-width:650px)": {
-            my: 3,
-          },
-        }}
-      >
-        Instruções
-      </Button>
-      {openToolTip && (
-        <Paper
-          elevation={3}
-          sx={{
-            position: "absolute",
-            top: "100%",
-            left: "120%",
-            transform: "translateX(-50%)",
-            mt: 1,
-            mb: 5,
-            p: 2,
-            width: 300,
-            backgroundColor: "#000000e3;",
-            color: "#fff",
-            boxShadow: "0px 0px 10px rgba(0, 0, 0, 0.1)",
-            zIndex: 10,
-            "@media (max-width:650px)": {
-              top: "75%",
-              left: "50%",
-            },
-          }}
-          onClick={handleTooltipClose}
-        >
-          <IconButton
-            onClick={handleTooltipClose}
-            size="small"
+        <Box position="relative">
+          <Button
+            variant="contained"
+            onClick={() => setOpenToolTip((prev) => !prev)}
             sx={{
-              position: "absolute",
-              top: 0,
-              right: 0,
-              color: "#fff",
+              "@media (max-width:650px)": {
+                my: 3,
+              },
             }}
           >
-            <CloseIcon fontSize="small" />
-          </IconButton>
-          <Typography variant="h6" gutterBottom>
-            <strong>Tutorial: Como Organizar Seus Treinos</strong>
-          </Typography>
-          <ol>
-            <li>
-              <strong>Adicionar Treino:</strong>
-              <ul>
-                <li>Vá para a seção "Adicionar Treino".</li>
-              </ul>
-            </li>
-            <li>
-              <strong>Criar Categorias:</strong>
-              <ul>
+            Instruções
+          </Button>
+          {openToolTip && (
+            <Paper
+              elevation={3}
+              sx={{
+                position: "absolute",
+                top: "100%",
+                left: "120%",
+                transform: "translateX(-50%)",
+                mt: 1,
+                mb: 5,
+                p: 2,
+                width: 300,
+                backgroundColor: "#000000e3;",
+                color: "#fff",
+                boxShadow: "0px 0px 10px rgba(0, 0, 0, 0.1)",
+                zIndex: 10,
+                "@media (max-width:650px)": {
+                  top: "75%",
+                  left: "50%",
+                },
+              }}
+              onClick={handleTooltipClose}
+            >
+              <IconButton
+                onClick={handleTooltipClose}
+                size="small"
+                sx={{
+                  position: "absolute",
+                  top: 0,
+                  right: 0,
+                  color: "#fff",
+                }}
+              >
+                <CloseIcon fontSize="small" />
+              </IconButton>
+              <Typography variant="h6" gutterBottom>
+                <strong>Tutorial: Como Organizar Seus Treinos</strong>
+              </Typography>
+              <ol>
                 <li>
-                  Em seguida, acesse a opção "Criar Categorias" para criar
-                  categorias relacionadas às áreas dos músculos que serão
-                  treinadas.
+                  <strong>Adicionar Treino:</strong>
+                  <ul>
+                    <li>Vá para a seção "Adicionar Treino".</li>
+                  </ul>
                 </li>
-              </ul>
-            </li>
-            <li>
-              <strong>Adicionar Treinos:</strong>
-              <ul>
                 <li>
-                  Depois de criar suas categorias, adicione seus treinos
-                  correspondentes a cada categoria, adicionando peso,
-                  repetições, séries e até mesmo comentários, caso ache
-                  necessário.
+                  <strong>Criar Categorias:</strong>
+                  <ul>
+                    <li>
+                      Em seguida, acesse a opção "Criar Categorias" para criar
+                      categorias relacionadas às áreas dos músculos que serão
+                      treinadas.
+                    </li>
+                  </ul>
                 </li>
-              </ul>
-            </li>
-            <li>
-              <strong>Registrar Treinos:</strong>
-              <ul>
                 <li>
-                  Vá para a aba "Registrar Treinos" para montar seus sets
-                  de treino. Aqui, você pode agrupar os exercícios para
-                  que eles fiquem mais organizados.
+                  <strong>Adicionar Treinos:</strong>
+                  <ul>
+                    <li>
+                      Depois de criar suas categorias, adicione seus treinos
+                      correspondentes a cada categoria, adicionando peso,
+                      repetições, séries e até mesmo comentários, caso ache
+                      necessário.
+                    </li>
+                  </ul>
                 </li>
-              </ul>
-            </li>
-            <li>
-              <strong>Finalizar e Retornar ao Início:</strong>
-              <ul>
                 <li>
-                  Após terminar de montar seus sets, retorne à página
-                  inicial.
+                  <strong>Registrar Treinos:</strong>
+                  <ul>
+                    <li>
+                      Vá para a aba "Registrar Treinos" para montar seus sets de
+                      treino. Aqui, você pode agrupar os exercícios para que
+                      eles fiquem mais organizados.
+                    </li>
+                  </ul>
                 </li>
-              </ul>
-            </li>
-            <li>
-              <strong>Arrastar e Soltar Sets:</strong>
-              <ul>
                 <li>
-                  Por fim, arraste seus sets do canto esquerdo para as
-                  respectivas datas no calendário, organizando assim sua
-                  rotina de treinos. Também é possível clicar nas datas do
-                  calendário para adicionar treinos diretamente. Se você
-                  estiver usando um dispositivo móvel, a única opção
-                  disponível será clicar nas datas do calendário.
+                  <strong>Finalizar e Retornar ao Início:</strong>
+                  <ul>
+                    <li>
+                      Após terminar de montar seus sets, retorne à página
+                      inicial.
+                    </li>
+                  </ul>
                 </li>
-              </ul>
-            </li>
-            <li>
-              <strong>Salvar:</strong>
-              <ul>
                 <li>
-                  Não se esqueça de salvar todas as suas alterações para
-                  garantir que seus treinos estejam registrados
-                  corretamente.
+                  <strong>Arrastar e Soltar Sets:</strong>
+                  <ul>
+                    <li>
+                      Por fim, arraste seus sets do canto esquerdo para as
+                      respectivas datas no calendário, organizando assim sua
+                      rotina de treinos. Também é possível clicar nas datas do
+                      calendário para adicionar treinos diretamente. Se você
+                      estiver usando um dispositivo móvel, a única opção
+                      disponível será clicar nas datas do calendário.
+                    </li>
+                  </ul>
                 </li>
-              </ul>
-            </li>
-          </ol>
-        </Paper>
-      )}
-    </Box>
+                <li>
+                  <strong>Salvar:</strong>
+                  <ul>
+                    <li>
+                      Não se esqueça de salvar todas as suas alterações para
+                      garantir que seus treinos estejam registrados
+                      corretamente.
+                    </li>
+                  </ul>
+                </li>
+              </ol>
+            </Paper>
+          )}
+        </Box>
         <Box sx={{ display: "flex", alignItems: "center" }}>
           <Button
             variant="contained"
@@ -522,7 +527,23 @@ const Calendar = ({ sets }) => {
             dateClick={handleDateClick}
             eventContent={(arg) => (
               <Box>
-                <Typography variant="body1" className="fc-event-title">
+                <IconButton
+                  size="small"
+                  sx={{
+                    position: "absolute",
+                    top: '5px',
+                    width: '20px',
+                    height: '20px',
+                    right: '5px',
+                    zIndex: 99999,
+                    color: "red",
+                    background: "white",
+                  }}
+                  onClick={() => handleDeleteEvent(arg.event)}
+                >
+                  <CloseIcon fontSize="small" />
+                </IconButton>
+                <Typography variant="body1" className="fc-event-title"   sx={{ maxWidth: '95px'}}>
                   {arg.event.extendedProps.name}
                 </Typography>
               </Box>
@@ -738,7 +759,7 @@ const Calendar = ({ sets }) => {
                     src={image}
                     alt="Imagem do treino"
                     width="100%"
-                    maxWidth="500px"
+                    maxWidth="1000px"
                     height="500px"
                   />
                 </>
@@ -755,7 +776,7 @@ const Calendar = ({ sets }) => {
                   <Button
                     variant="contained"
                     color="secondary"
-                    onClick={handleDeleteEvent}
+                    onClick={() => handleDeleteEvent(selectedEvent)}
                     sx={{ marginBottom: "20px" }}
                   >
                     Excluir Set
