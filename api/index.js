@@ -14,22 +14,13 @@ dotenv.config();
 
 const app = express();
 
-// mongoose
-//   .connect(process.env.MONGO)
-//   .then(() => {
-//     console.log("MongoDB conectado");
-//     app.listen(process.env.PORT || 3000, (req, res) => {
-//       console.log(`Servidor rodando na porta: 3000.`);
-//     });
-//   })
-//   .catch((err) => {
-//     console.log(err, "ERROR");
-//   });
-
 mongoose
   .connect(process.env.MONGO)
   .then(() => {
     console.log("MongoDB conectado");
+    app.listen(process.env.PORT || 3000, (req, res) => {
+      console.log(`Servidor rodando na porta: 3000.`);
+    });
   })
   .catch((err) => {
     console.log(err, "ERROR");
