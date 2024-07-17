@@ -46,7 +46,7 @@ app.get('*', (req, res) => {
 // };
 
 // app.use("/", cors(corsOptions));
-app.use(cors())
+
 
 app.use(cookieParser()); //extrai as informações contidas nos cookies e as torna acessíveis para o servidor
 app.use(express.json()); //middleware usado para analisar o corpo das solicitações HTTP com formato JSON

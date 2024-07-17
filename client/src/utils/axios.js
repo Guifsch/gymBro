@@ -41,6 +41,7 @@ const axiosConfig = () => {
     (error) => {
     
       if (!error.response) {
+        console.log(error)
         dispatch(snackBarMessageError("Ops, ocorreu um erro, verifique sua conexão!"));
         dispatch(signOut());
       }
