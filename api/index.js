@@ -37,16 +37,16 @@ app.get('*', (req, res) => {
 });
 
 
-const corsOptions = {
-  //configuração do cors pra não dar o erro cors e o cookie ser setado do backend de forma correta no cookies do applications usando o axios
-  // origin: ["http://localhost:5173", "http://192.168.15.7:5173"],
-  origin: ["http://localhost:5173"],
-  credentials: true,
-  exposedHeaders: ["set-cookie"],
-};
+// const corsOptions = {
+//   //configuração do cors pra não dar o erro cors e o cookie ser setado do backend de forma correta no cookies do applications usando o axios
+//   // origin: ["http://localhost:5173", "http://192.168.15.7:5173"],
+//   origin: ["http://localhost:5173"],
+//   credentials: true,
+//   exposedHeaders: ["set-cookie"],
+// };
 
-app.use("/", cors(corsOptions));
-// app.use(cors())
+// app.use("/", cors(corsOptions));
+app.use(cors())
 
 app.use(cookieParser()); //extrai as informações contidas nos cookies e as torna acessíveis para o servidor
 app.use(express.json()); //middleware usado para analisar o corpo das solicitações HTTP com formato JSON

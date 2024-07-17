@@ -47,6 +47,7 @@ function Signup() {
       history("/sign-in");
     } catch (error) {
       dispatch(snackBarMessageError(error.response.data.error));
+      dispatch(loadingFalse());
     }
     dispatch(loadingFalse());
   };
