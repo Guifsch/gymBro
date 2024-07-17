@@ -8,12 +8,20 @@ const axiosConfig = () => {
   let history = useNavigate();
   const dispatch = useDispatch();
   const axiosClient = axios.create({
-    baseURL: "http://192.168.15.7:3000/",
+    baseURL: "http://localhost:3000/",
     timeout: 5000,
     headers: {
       "Content-Type": "application/json",
     },
   });
+
+  // const axiosClient = axios.create({
+  //   baseURL: "http://192.168.15.7:3000/",
+  //   timeout: 5000,
+  //   headers: {
+  //     "Content-Type": "application/json",
+  //   },
+  // });
 
  axiosClient.interceptors.request.use(
     (config) => {
