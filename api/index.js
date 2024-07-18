@@ -38,12 +38,19 @@ app.get('*', (req, res) => {
 
 
 const corsOptions = {
-  //configuração do cors pra não dar o erro cors e o cookie ser setado do backend de forma correta no cookies do applications usando o axios
-  // origin: ["http://localhost:5173", "http://192.168.15.7:5173"],
-  origin: ["http://localhost:5173"],
-  credentials: true,
-  exposedHeaders: ["set-cookie"],
+  origin: 'http://localhost:8080', // Permite apenas a origem especificada
+  methods: ['GET', 'POST', 'PUT', 'HEAD', 'OPTIONS'], // Permite apenas os métodos especificados
+  allowedHeaders: ['X-Requested-With', 'Content-Type', 'Authorization'], // Permite apenas os cabeçalhos especificados
+  credentials: true // Permite envio de cookies e credenciais
 };
+
+// const corsOptions = {
+//   //configuração do cors pra não dar o erro cors e o cookie ser setado do backend de forma correta no cookies do applications usando o axios
+//   // origin: ["http://localhost:5173", "http://192.168.15.7:5173"],
+//   origin: ["http://localhost:5173"],
+//   credentials: true,
+//   exposedHeaders: ["set-cookie"],
+// };
 
 app.use("/", cors(corsOptions));
 
