@@ -38,7 +38,7 @@ app.get('*', (req, res) => {
 
 
 const corsOptions = {
-  origin: 'http://localhost:8080', // Permite apenas a origem especificada
+  origin: '*', // Permite apenas a origem especificada
   methods: ['GET', 'POST', 'PUT', 'HEAD', 'OPTIONS'], // Permite apenas os métodos especificados
   allowedHeaders: ['X-Requested-With', 'Content-Type', 'Authorization'], // Permite apenas os cabeçalhos especificados
   credentials: true // Permite envio de cookies e credenciais
@@ -52,7 +52,7 @@ const corsOptions = {
 //   exposedHeaders: ["set-cookie"],
 // };
 
-app.use("/", cors(corsOptions));
+app.use(cors(corsOptions));
 
 
 app.use(cookieParser()); //extrai as informações contidas nos cookies e as torna acessíveis para o servidor
